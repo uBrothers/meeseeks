@@ -29,7 +29,7 @@ if(db){
 }
 
 
-schedule.scheduleJob('15 18 * * *', function(){
+schedule.scheduleJob('45 18 * * *', function(){
   // 종가 > 5일선 > 10일선 > 20일선, 종가 > 시가 && vol_5 > vol_10
   let day=moment().day(); //0: 일, 1: 월, 2: 화. 3: 수, 4: 목, 5: 금, 6: 토
   let buyList=[]; //['A028300', 'A007570'] 이런식으로 데이터 타입이 저장되어야함!!
