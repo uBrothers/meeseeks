@@ -25,7 +25,7 @@ var db = new mysql({
 });
 
 if(db){
-  console.log("Database Connected to 'meeseeks'");
+  console.log("Database Connected to 'meeseeks Ver 1.0'");
   send('Database Connected!!!');
 }
 
@@ -72,7 +72,6 @@ schedule.scheduleJob('15 18 * * *', function(){
   var buySQL = 'INSERT INTO buy_list (list, date) VALUES ("'+buyList+'","'+date+'") ON DUPLICATE KEY UPDATE list="'+buyList+'", date="'+date+'"';
   db.query(buySQL);
   list=''+list;
-  send('내일 매수할 종목 list ->');
   send(list);
   console.log(date+"(내일)에 매수할 종목 저장 완료");
 });

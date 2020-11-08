@@ -285,6 +285,7 @@ def sell_all():
 
 if __name__ == '__main__':
     try:
+        dbgout('`meeseeks_ver_1.0 is running ~`')
         symbol_list = MarketDB().get_buy_list().list[0].split(',')
         bought_list = []     # 매수 완료된 종목 리스트
         target_buy_count = 8 # 매수할 종목 수

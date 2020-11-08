@@ -26,17 +26,11 @@ var db = new mysql({
 
 if(db){
   console.log("Database Connected to 'meeseeks'");
-  send('Database Connected!!!');
 }
 
-schedule.scheduleJob('30 * * * *', function(){
-  send('Server is running!');
-});
+schedule.scheduleJob('15 18 * * *', function(){
 
-
-//schedule.scheduleJob('15 18 * * *', function(){
-
-  send('meeseeks_ver_01.js is running!');
+  send('meeseeks_ver_00.js is running!');
   send('Look at me! I am Mr.Meeseeks.');
 
   var day=moment().day(); //0: 일, 1: 월, 2: 화. 3: 수, 4: 목, 5: 금, 6: 토
@@ -62,6 +56,7 @@ schedule.scheduleJob('30 * * * *', function(){
         if(price[0].close<price[0].open&&vol_5>vol_10){
           if(price[0].open){
             c++;
+            console.log(companyInfo[i]);
             list.push(c+':'+companyInfo[i].company);
             buyList.push('A'+companyInfo[i].code);
           }
@@ -69,9 +64,9 @@ schedule.scheduleJob('30 * * * *', function(){
       }
     }
   }
-  var buySQL = 'INSERT INTO buy_list (list, date) VALUES ("'+buyList+'","'+date+'") ON DUPLICATE KEY UPDATE list="'+buyList+'", date="'+date+'"';
-  db.query(buySQL);
+
+  //console.log(buyList);
   list=''+list;
   send(list);
-  console.log(date+"(내일)에 매수할 종목 저장 완료");
-//});
+
+});
