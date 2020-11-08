@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import Analyzer
 
 mk = Analyzer.MarketDB()
-raw_df = mk.get_daily_price('삼성전자', '2018-05-04', '2020-01-22')
+raw_df = mk.get_daily_price('에이치엘비', '2020-01-04', '2020-11-07')
 
 window_size = 10
 data_size = 5
