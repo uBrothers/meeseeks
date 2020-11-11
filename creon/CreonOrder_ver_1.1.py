@@ -300,7 +300,8 @@ if __name__ == '__main__':
         printlog('종목별 주문 비율 : ', buy_percent)
         printlog('종목별 주문 금액 : ', buy_amount)
         printlog('시작 시간 : ', datetime.now().strftime('%m/%d %H:%M:%S'))
-        soldout = False;
+        soldout = False
+        countLoop = 0
         while True:
             t_now = datetime.now()
             t_9 = t_now.replace(hour=9, minute=0, second=0, microsecond=0)
@@ -322,6 +323,7 @@ if __name__ == '__main__':
                     alarm = get_stock_balance('ALL')
                     time.sleep(60)
                 for sym in symbol_list:
+                    countLoop = countLoop + 1
                     if len(bought_list) < target_buy_count:
                         if buy_stock(sym) == True:
                             time.sleep(1)
@@ -329,6 +331,8 @@ if __name__ == '__main__':
                             time.sleep(1)
             if t_sell < t_now < t_exit:  # PM 03:15 ~ PM 03:20 : 일괄 매도
                 if sell_all() == True:
+                    countLoop = countLoop / len(symbol_list)
+                    dbgout(str(countLoop))
                     dbgout('`전량 매도 완료! -> 프로그램을 종료합니다.`')
                     sys.exit(0)
             if t_exit < t_now:  # PM 03:20 ~ :프로그램 종료
