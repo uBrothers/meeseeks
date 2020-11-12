@@ -5,8 +5,6 @@ using nodeJS
 
 using mariaDB	>mysql -u root -p
 
-using krx-stock-api ( https://github.com/Shin-JaeHeon/krx-stock-api )
-
 mariaDB wait_timeout=288000
 
 $  sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
