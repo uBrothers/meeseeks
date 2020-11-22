@@ -31,11 +31,14 @@ if(db){
 // 종가 > 5일선 > 10일선 > 20일선, 종가 > 시가 && vol_5 > vol_10
 let companyInfo = db.query('SELECT * FROM company_info');
 let money=100;
-var period = 7; //backtest days
+var period = 1; //backtest days
 var cbr_period=3;
 var cci = new Array(5);
 var bollinger = new Array(5), bollinger_std = new Array(5), bollinger_up = new Array(5), bollinger_down = new Array(5);
 var rsi = new Array(5), num_rsi=100;
+var percentB = 0;
+var tp = new Array(15);
+var mfi = 0;
 
 for(var n=period; n>0; n--){
   var date;
@@ -54,6 +57,20 @@ for(var n=period; n>0; n--){
       line_20=(price[n].close+price[n+1].close+price[n+2].close+price[n+3].close+price[n+4].close+price[n+5].close+price[n+6].close+price[n+7].close+price[n+8].close+price[n+9].close+price[n+10].close+price[n+11].close+price[n+12].close+price[n+13].close+price[n+14].close+price[n+15].close+price[n+16].close+price[n+17].close+price[n+18].close+price[n+19].close)/20;
       vol_5=(price[n].volume+price[n+1].volume+price[n+2].volume+price[n+3].volume+price[n+4].volume)/5;
       vol_10=(price[n].volume+price[n+1].volume+price[n+2].volume+price[n+3].volume+price[n+4].volume+price[n+5].volume+price[n+6].volume+price[n+7].volume+price[n+8].volume+price[n+9].volume)/10;
+
+      //MFI money flow index 10일간
+      for(var p=0; p<10; p++){
+        tp[p]=(price[n+p].high+price[n+p].low+price[n+p].close)/3
+      }
+      var pmf=0, nmf=0;
+      for(var pp=0; pp<9; pp++){
+        if(tp[pp]>tp[pp+1]){//긍정적 흐름
+          pmf=pmf+tp[pp]*price[n+pp].volume;
+        }else{//부정적 흐름
+          nmf=nmf+tp[pp]*price[n+pp].volume;
+        }
+      }
+      mfi = 100-100/(1+pmf/nmf); //mfi가 80보다 크면 매수 신호; mfi가 20보다 작으면 매도 신호;
 
       //cci & bollinger & rsi logic
       for(var k=0; k<cbr_period; k++){
@@ -74,11 +91,13 @@ for(var n=period; n>0; n--){
               }
               x14 = x14/14;
               cci[k] = (price[k+n].M-m)/(x14*0.015);
+
               //bollinger
               bollinger_std[k]=math.std([price[n+k].close,price[n+k+1].close,price[n+k+2].close,price[n+k+3].close,price[n+k+4].close,price[n+k+5].close,price[n+k+6].close,price[n+k+7].close,price[n+k+8].close,price[n+k+9].close,price[n+k+10].close,price[n+k+11].close,price[n+k+12].close,price[n+k+13].close,price[n+k+14].close,price[n+k+15].close,price[n+k+16].close,price[n+k+17].close,price[n+k+18].close,price[n+k+19].close],'uncorrected');
               bollinger[k]=math.mean([price[n+k].close,price[n+k+1].close,price[n+k+2].close,price[n+k+3].close,price[n+k+4].close,price[n+k+5].close,price[n+k+6].close,price[n+k+7].close,price[n+k+8].close,price[n+k+9].close,price[n+k+10].close,price[n+k+11].close,price[n+k+12].close,price[n+k+13].close,price[n+k+14].close,price[n+k+15].close,price[n+k+16].close,price[n+k+17].close,price[n+k+18].close,price[n+k+19].close]);
               bollinger_up[k]=bollinger[k]+2*bollinger_std[k];
               bollinger_down[k]=bollinger[k]-2*bollinger_std[k];
+
               //rsi
               var rsi_up=0, rsi_down=0;
               for (var w = num_rsi+n-1; w > n; w--) {
@@ -100,6 +119,18 @@ for(var n=period; n>0; n--){
               }
               rsi[k]=rsi_up*100/(rsi_up+rsi_down);
       }
+      percentB=(price[n].close-bollinger_down[0])/(bollinger_std[0]*2); //%b 0.8보다 크면 매수 신호; 0.2보다 작으면 매도 신호;
+      /*
+      if(companyInfo[i].code == "028300"){
+        console.log(companyInfo[i].company);
+        console.log(mfi);
+        console.log(percentB);
+      }
+      */
+      if(mfi<20 && percentB<0.2){
+        console.log(companyInfo[i].company);
+      }
+
 
       if(price[n-1].open){
         if(vol_5>vol_10){
@@ -152,6 +183,7 @@ for(var n=period; n>0; n--){
   var a=percent/real_buy_count*100-0.3;
   money=money*(1+a/100);
   console.log(nDay);
+  /*
   console.log(count);
   console.log("golden_cross_count: ",golden_cross_count);
   console.log("rsi: ",rsi_count);
@@ -162,5 +194,5 @@ for(var n=period; n>0; n--){
   console.log("수익률: ",a);
   console.log("누적수익: ",money);
   console.log("buy: ",buy_count);
-
+  */
 }
