@@ -38,6 +38,8 @@ var bollinger = new Array(5), bollinger_std = new Array(5), bollinger_up = new A
 var rsi = new Array(5), num_rsi=100;
 var percentB = new Array(5);
 var mfi = new Array(5);
+var ii = new Array(25);
+var percentII = new Array(5);
 var n=0;
 //for(var n=period; n>0; n--){
   var date;
@@ -119,6 +121,22 @@ var n=0;
                 nmf=0.001;
               }
               mfi[k] = 100-100/(1+pmf/nmf); //mfi가 80보다 크면 매수 신호; mfi가 20보다 작으면 매도 신호;
+
+              //일중 강도
+              var vol_21=0, checkII=0;
+              percentII[k]=0;
+              for(var q=0; q<21; q++){
+                if(price[q+k+n].high-price[q+k+n].low>0 && checkII==0){
+                  ii[q]=price[q+k+n].volume*(2*price[q+k+n].close-price[q+k+n].high-price[q+k+n].low)/(price[q+k+n].high-price[q+k+n].low);
+                  vol_21+=price[q+k+n].volume;
+                  percentII[k]+=ii[q];
+                }else {
+                  vol_21=1;
+                  percentII[k]=0;
+                  checkII=1;
+                }
+              }
+              percentII[k]=100*percentII[k]/vol_21;
       }
 
 
@@ -131,7 +149,7 @@ var n=0;
       */
       if(mfi[0]<20 && mfi[0]>0){
         if(percentB[0]<0.2)
-        console.log(companyInfo[i].company,bollinger[0],mfi[0],percentB[0]);
+        console.log(companyInfo[i].company,percentII[0],percentII[1],percentII[2]);
       }
 
       /*

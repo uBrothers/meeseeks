@@ -36,6 +36,8 @@ var bollinger = new Array(5), bollinger_std = new Array(5), bollinger_up = new A
 var rsi = new Array(5), num_rsi=100;
 var percentB = new Array(5);
 var mfi = new Array(5);
+var ii = new Array(25);
+var percentII = new Array(5);
 //스케쥴 관련 자동 실행 아래 부분 all
 for(var i=0; i<companyInfo.length; i++){
   var params = companyInfo[i].code;
@@ -112,11 +114,27 @@ for(var i=0; i<companyInfo.length; i++){
               nmf=0.001;
             }
             mfi[k] = 100-100/(1+pmf/nmf); //mfi가 80보다 크면 매수 신호; mfi가 20보다 작으면 매도 신호;
+
+            //일중 강도
+            var vol_21=0, checkII=0;
+            percentII[k]=0;
+            for(var q=0; q<21; q++){
+              if(price[q+k].high-price[q+k].low>0 && checkII==0){
+                ii[q]=price[q+k].volume*(2*price[q+k].close-price[q+k].high-price[q+k].low)/(price[q+k].high-price[q+k].low);
+                vol_21+=price[q+k].volume;
+                percentII[k]+=ii[q];
+              }else {
+                vol_21=1;
+                percentII[k]=0;
+                checkII=1;
+              }
+            }
+            percentII[k]=100*percentII[k]/vol_21;
     }
 
     if(mfi[0]<20 && mfi[0]>0){
       if(percentB[0]<0.2)
-      console.log(companyInfo[i].company,bollinger[0],mfi[0],percentB[0]);
+      console.log(companyInfo[i].company,percentII[0],percentII[1],percentII[2]);
     }
     //main logic
   }
