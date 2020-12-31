@@ -40,8 +40,7 @@ var percentB = new Array(5);
 var mfi = new Array(5);
 var ii = new Array(25);
 var percentII = new Array(5);
-var n=0;
-//for(var n=period; n>0; n--){
+for(var n=period; n>0; n--){
   var date;
   var percent=0;
   var count=0, real_buy_count=0, buy_count=0, vol_count=0, rsi_count=0, cci_count=0, bollinger_count=0, golden_cross_count=0;
@@ -138,65 +137,8 @@ var n=0;
               }
               percentII[k]=100*percentII[k]/vol_21;
       }
-
-
-      /*
-      if(companyInfo[i].code == "028300"){
-        console.log(companyInfo[i].company);
-        console.log(mfi);
-        console.log(percentB);
-      }
-      */
-      if(mfi[0]<20 && mfi[0]>0){
-        if(percentB[0]<0.2)
-        console.log(companyInfo[i].company,percentII[0],percentII[1],percentII[2]);
-      }
-
-      /*
-      if(price[n-1].open){
-        if(vol_5>vol_10){
-          if(price[n].close>line_5 && line_5>=line_10 && line_10>=line_20){
-            if(rsi[0]>rsi[1] && rsi[1]>rsi[2]){
-              if(bollinger_std[0]>bollinger_std[1] && bollinger_std[1]>bollinger_std[2]){
-                if(cci[0]>cci[1] && cci[1]>cci[2]){
-                  percent=percent+price[n-1].close/price[n-1].open-1;
-                  real_buy_count++;
-                }
-              }
-            }
-          }
-        }
-        if(price[n-1].close>price[n].close && price[n-1].close>price[n-1].open){
-          count++;
-          if(cci[0]>cci[1] && cci[1]>cci[2]){
-            cci_count++;
-          }
-          if(bollinger_std[0]>bollinger_std[1] && bollinger_std[1]>bollinger_std[2]){
-            bollinger_count++;
-          }
-          if(rsi[0]>rsi[1] && rsi[1]>rsi[2]){
-            rsi_count++;
-          }
-          if(price[n].close>line_5 && line_5>=line_10 && line_10>=line_20){
-            golden_cross_count++;
-          }
-          if(vol_5>vol_10) {
-            vol_count++;
-          }
-          if(vol_5>vol_10){
-            if(price[n].close>line_5 && line_5>=line_10 && line_10>=line_20){
-              if(rsi[0]>rsi[1] && rsi[1]>rsi[2]){
-                if(bollinger_std[0]>bollinger_std[1] && bollinger_std[1]>bollinger_std[2]){
-                  if(cci[0]>cci[1] && cci[1]>cci[2]){
-                    buy_count++;
-                  }
-                }
-              }
-            }
-          }
-          date=price[n-1].date;
-        }
-      }*/
+      //main logic
+      if()
 
     }
   }
@@ -216,4 +158,4 @@ var n=0;
   console.log("누적수익: ",money);
   console.log("buy: ",buy_count);
   */
-//}
+}
