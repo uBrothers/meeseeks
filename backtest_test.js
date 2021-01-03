@@ -30,8 +30,10 @@ if(db){
 
 // 종가 > 5일선 > 10일선 > 20일선, 종가 > 시가 && vol_5 > vol_10
 let companyInfo = db.query('SELECT * FROM company_info');
+let buyList=[]; //['A028300', 'A007570'] 이런식으로 데이터 타입이 저장되어야함!!
 let money=100;
-var period = 3; //backtest days
+var margin=5/100;
+var period = 10; //backtest days
 var cbr_period=3;
 var cci = new Array(5);
 var bollinger = new Array(5), bollinger_std = new Array(5), bollinger_up = new Array(5), bollinger_down = new Array(5);
@@ -138,14 +140,40 @@ for(var n=period; n>0; n--){
               percentII[k]=100*percentII[k]/vol_21;
       }
       //main logic
-      if()
+      if(vol_5>=vol_10){
+        if(line_5>=line_10 && line_10>=line_20){
+          if(margin>=0){
+            if(price[n-1].high>(1+margin)*price[n-1].open){
+              count++;
+              percent=percent+price[n-1].close/(price[n-1].open*(1+margin))-1;
+              buyList.push(companyInfo[i].company);
+              date=price[n-1].date;
+            }
+          }
+        }
+      }
 
     }
   }
-  var nDay = moment(date).format('YYYY-MM-DD');
-  var a=percent/real_buy_count*100-0.3;
-  money=money*(1+a/100);
-  console.log(nDay);
+
+  if(count){
+    var testDate = moment(date).format('YYYY-MM-DD');
+    console.log(testDate);
+    var fee=percent/count*100-0.3;
+    console.log(count,"****",fee.toFixed(3));
+    money=money*(1+fee/100);
+    console.log("money: ",money.toFixed(3));
+    //console.log(buyList);
+    console.log(" ");
+    buyList=[];
+
+  }else{
+    var testDate = moment(date).format('YYYY-MM-DD');
+    console.log(testDate);
+    console.log("거래 안함");
+  }
+
+
   /*
   console.log(count);
   console.log("golden_cross_count: ",golden_cross_count);
@@ -159,3 +187,8 @@ for(var n=period; n>0; n--){
   console.log("buy: ",buy_count);
   */
 }
+let condition = '' + "backtest_test.js --> margin : " + margin;
+let message = '' + period + "일(거래일) 간 누적 수익 : " + (money-100).toFixed(2) +"%";
+send('< BACK TEST RESULT >')
+send(condition)
+send(message);
