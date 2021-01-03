@@ -33,7 +33,7 @@ let companyInfo = db.query('SELECT * FROM company_info');
 let buyList=[]; //['A028300', 'A007570'] 이런식으로 데이터 타입이 저장되어야함!!
 let money=100;
 var margin=5/100;
-var period = 10; //backtest days
+var period = 1; //backtest days
 var cbr_period=3;
 var cci = new Array(5);
 var bollinger = new Array(5), bollinger_std = new Array(5), bollinger_up = new Array(5), bollinger_down = new Array(5);
@@ -88,19 +88,19 @@ for(var n=period; n>0; n--){
 
               //rsi
               var rsi_up=0, rsi_down=0;
-              for (var w = num_rsi+n-1; w > n; w--) {
-                if(w>num_rsi-14){
-                  if(price[w+k-1].close-price[w+k].close>0){
-                    rsi_up+=(price[w+k-1].close-price[w+k].close)/14;
+              for (var w = num_rsi-1+n+k; w > n+k; w--) {
+                if(w>num_rsi-14+n+k){
+                  if(price[w-1].close-price[w].close>0){
+                    rsi_up+=(price[w-1].close-price[w].close)/14;
                   }else{
-                    rsi_down-=(price[w+k-1].close-price[w+k].close)/14;
+                    rsi_down-=(price[w-1].close-price[w].close)/14;
                   }
                 }else {
-                  if(price[w+k-1].close-price[w+k].close>0){
-                    rsi_up=(rsi_up*13+(price[w+k-1].close-price[w+k].close))/14;
+                  if(price[w-1].close-price[w].close>0){
+                    rsi_up=(rsi_up*13+(price[w-1].close-price[w].close))/14;
                     rsi_down=rsi_down*13/14;
                   }else{
-                    rsi_down=(rsi_down*13-(price[w+k-1].close-price[w+k].close))/14;
+                    rsi_down=(rsi_down*13-(price[w-1].close-price[w].close))/14;
                     rsi_up=rsi_up*13/14;
                   }
                 }
@@ -111,11 +111,11 @@ for(var n=period; n>0; n--){
               percentB[k]=(price[n+k].close-bollinger_down[k])/(bollinger_std[k]*4); //%b 0.8보다 크면 매수 신호; 0.2보다 작으면 매도 신호;
               //MFI money flow index 10일간
               var pmf=0, nmf=0;
-              for(var p=0; p<10; p++){
+              for(var p=n+k; p<10+n+k; p++){
                 if(price[p].M>price[p+1].M){//긍정적 흐름
-                  pmf+=price[p].M*price[n+p].volume;
+                  pmf+=price[p].M*price[p].volume;
                 }else{//부정적 흐름
-                  nmf+=price[p].M*price[n+p].volume;
+                  nmf+=price[p].M*price[p].volume;
                 }
               }
               if(nmf==0){
@@ -131,7 +131,7 @@ for(var n=period; n>0; n--){
                   ii[q]=price[q+k+n].volume*(2*price[q+k+n].close-price[q+k+n].high-price[q+k+n].low)/(price[q+k+n].high-price[q+k+n].low);
                   vol_21+=price[q+k+n].volume;
                   percentII[k]+=ii[q];
-                }else {
+                }else{
                   vol_21=1;
                   percentII[k]=0;
                   checkII=1;
@@ -139,6 +139,17 @@ for(var n=period; n>0; n--){
               }
               percentII[k]=100*percentII[k]/vol_21;
       }
+      //test 지표
+      if(params=="005930"){
+        console.log("RSI: ", rsi[0],rsi[1],rsi[2]);
+        console.log("CCI: ", cci[0],cci[1],cci[2]);
+        console.log("MFI: ", mfi[0],mfi[1],mfi[2]);
+        console.log("%B: ", percentB[0],percentB[1],percentB[2]);
+        console.log("%II: ", percentII[0],percentII[1],percentII[2]);
+        console.log("Bol_down: ", bollinger_down[0],bollinger_down[1],bollinger_down[2]);
+
+      }
+
       //main logic
       if(vol_5>=vol_10){
         if(line_5>=line_10 && line_10>=line_20){
@@ -160,7 +171,7 @@ for(var n=period; n>0; n--){
     var testDate = moment(date).format('YYYY-MM-DD');
     console.log(testDate);
     var fee=percent/count*100-0.3;
-    console.log(count,"****",fee.toFixed(3));
+    console.log(count,"종목 ",fee.toFixed(3));
     money=money*(1+fee/100);
     console.log("money: ",money.toFixed(3));
     //console.log(buyList);
@@ -173,22 +184,7 @@ for(var n=period; n>0; n--){
     console.log("거래 안함");
   }
 
-
-  /*
-  console.log(count);
-  console.log("golden_cross_count: ",golden_cross_count);
-  console.log("rsi: ",rsi_count);
-  console.log("cci: ",cci_count);
-  console.log("bollinger: ",bollinger_count);
-  console.log("volume: ",vol_count);
-  console.log("real_buy: ",real_buy_count);
-  console.log("수익률: ",a);
-  console.log("누적수익: ",money);
-  console.log("buy: ",buy_count);
-  */
 }
-let condition = '' + "backtest_test.js --> margin : " + margin;
-let message = '' + period + "일(거래일) 간 누적 수익 : " + (money-100).toFixed(2) +"%";
-send('< BACK TEST RESULT >')
-send(condition)
-send(message);
+let message = '' + period + " 거래일 back test 예상 누적 수익 : " + (money-100).toFixed(2) +"%";
+console.log(message);
+//send(message);

@@ -29,7 +29,7 @@ if(db){
 }
 
 
-schedule.scheduleJob('45 18 * * *', function(){
+//schedule.scheduleJob('45 18 * * *', function(){
   // 종가 > 5일선 > 10일선 > 20일선, 종가 > 시가 && vol_5 > vol_10
   let day=moment().day(); //0: 일, 1: 월, 2: 화. 3: 수, 4: 목, 5: 금, 6: 토
   let buyList=[]; //['A028300', 'A007570'] 이런식으로 데이터 타입이 저장되어야함!!
@@ -202,8 +202,8 @@ schedule.scheduleJob('45 18 * * *', function(){
 
   let condition = '' + "backtest_ver00.js --> margin : " + margin;
   let message = '' + period + "일(거래일) 간 누적 수익 : " + (money-100).toFixed(2) +"%";
-  send('< BACK TEST RESULT >')
-  send(condition)
-  send(message);
+  //send('< BACK TEST RESULT >')
+  //send(condition)
+  //send(message);
 
-});
+//});

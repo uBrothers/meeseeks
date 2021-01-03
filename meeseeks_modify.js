@@ -80,19 +80,19 @@ for(var i=0; i<companyInfo.length; i++){
 
             //rsi
             var rsi_up=0, rsi_down=0;
-            for (var w = num_rsi-1; w > 0; w--) {
-              if(w>num_rsi-14){
-                if(price[w+k-1].close-price[w+k].close>0){
-                  rsi_up+=(price[w+k-1].close-price[w+k].close)/14;
+            for (var w = num_rsi-1+k; w > k; w--) {
+              if(w>num_rsi-14+k){
+                if(price[w-1].close-price[w].close>0){
+                  rsi_up+=(price[w-1].close-price[w].close)/14;
                 }else{
-                  rsi_down-=(price[w+k-1].close-price[w+k].close)/14;
+                  rsi_down-=(price[w-1].close-price[w].close)/14;
                 }
               }else {
-                if(price[w+k-1].close-price[w+k].close>0){
-                  rsi_up=(rsi_up*13+(price[w+k-1].close-price[w+k].close))/14;
+                if(price[w-1].close-price[w].close>0){
+                  rsi_up=(rsi_up*13+(price[w-1].close-price[w].close))/14;
                   rsi_down=rsi_down*13/14;
                 }else{
-                  rsi_down=(rsi_down*13-(price[w+k-1].close-price[w+k].close))/14;
+                  rsi_down=(rsi_down*13-(price[w-1].close-price[w].close))/14;
                   rsi_up=rsi_up*13/14;
                 }
               }
@@ -103,7 +103,7 @@ for(var i=0; i<companyInfo.length; i++){
             percentB[k]=(price[k].close-bollinger_down[k])/(bollinger_std[k]*4); //%b 0.8보다 크면 매수 신호; 0.2보다 작으면 매도 신호;
             //MFI money flow index 10일간
             var pmf=0, nmf=0;
-            for(var p=0; p<10; p++){
+            for(var p=k; p<10+k; p++){
               if(price[p].M>price[p+1].M){//긍정적 흐름
                 pmf+=price[p].M*price[p].volume;
               }else{//부정적 흐름
@@ -123,7 +123,7 @@ for(var i=0; i<companyInfo.length; i++){
                 ii[q]=price[q+k].volume*(2*price[q+k].close-price[q+k].high-price[q+k].low)/(price[q+k].high-price[q+k].low);
                 vol_21+=price[q+k].volume;
                 percentII[k]+=ii[q];
-              }else {
+              }else{
                 vol_21=1;
                 percentII[k]=0;
                 checkII=1;
