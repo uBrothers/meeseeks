@@ -1,10 +1,11 @@
 import pandas as pd
 from bs4 import BeautifulSoup
 import urllib, pymysql, calendar, time, json
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from datetime import datetime
 from threading import Timer
 from slacker import Slacker
+import requests
 slack = Slacker('xoxb-1398877919094-1406719016898-vSj7JEDRgOSEeK6MTDOygRng')
 
 class DBUpdater:
@@ -90,7 +91,9 @@ class DBUpdater:
         """네이버에서 주식 시세를 읽어서 데이터프레임으로 반환"""
         try:
             url = f"http://finance.naver.com/item/sise_day.nhn?code={code}"
-            with urlopen(url) as doc:
+            req = Request(url)
+            req.add_header('User-Agent', 'Mozilla/5.0')
+            with urlopen(req) as doc:
                 if doc is None:
                     return None
                 html = BeautifulSoup(doc, "lxml")
@@ -103,7 +106,10 @@ class DBUpdater:
             pages = min(int(lastpage), pages_to_fetch)
             for page in range(1, pages + 1):
                 pg_url = '{}&page={}'.format(url, page)
-                df = df.append(pd.read_html(pg_url, header=0)[0])
+                ask_pg_url=Request(pg_url)
+                ask_pg_url.add_header('User-Agent', 'Mozilla/5.0')
+                open_pg_url=urlopen(ask_pg_url)
+                df = df.append(pd.read_html(open_pg_url, header=0)[0])
                 tmnow = datetime.now().strftime('%Y-%m-%d %H:%M')
                 print('[{}] {} ({}) : {:04d}/{:04d} pages are downloading...'.
                     format(tmnow, company, code, page, pages), end="\r")
