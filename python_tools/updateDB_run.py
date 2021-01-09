@@ -5,7 +5,6 @@ from urllib.request import Request, urlopen
 from datetime import datetime
 from threading import Timer
 from slacker import Slacker
-import requests
 slack = Slacker('xoxb-1398877919094-1406719016898-vSj7JEDRgOSEeK6MTDOygRng')
 
 class DBUpdater:
