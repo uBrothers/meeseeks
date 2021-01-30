@@ -20,6 +20,96 @@ logger.addHandler(file_handler)
 class MarketDB:
     def __init__(self):
         self.conn = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
+        self.codes = {}
+        self.get_buy_list()
+
+        with self.conn.cursor() as curs:
+            sql = """
+            CREATE TABLE IF NOT EXISTS trade_log (
+                date Date,
+                start_money BIGINT(20),
+                start_stock VARCHAR(20),
+                start_total BIGINT(20),
+                end_money BIGINT(20),
+                end_stock BIGINT(20),
+                bought_stock VARCHAR(20),
+                keep_stock VARCHAR(20),
+                end_total BIGINT(20),
+                profit BIGINT(20),
+                deposit_withdrawal VARCHAR(20),
+                PRIMARY KEY (date))
+            """
+            curs.execute(sql)
+
+    def trade_log_start(self):
+        with self.conn.cursor() as curs:
+            today = datetime.now().strftime('%Y-%m-%d')
+            start_money = int(get_current_cash())
+            start_stock = get_current_stock()
+            start_total = int(get_current_total())
+            deposit_withdrawal = 0
+            sql = f"INSERT INTO trade_log (date, start_money, start_stock, start_total, deposit_withdrawal)"\
+            f" VALUES ('{today}', '{start_money}', '{start_stock}', '{start_total}', '{deposit_withdrawal}')"\
+            f" ON DUPLICATE KEY UPDATE date='{today}'"
+            curs.execute(sql)
+            self.conn.commit()
+        return True
+
+    def trade_log_middle(self):
+        with self.conn.cursor() as curs:
+            today = datetime.now().strftime('%Y-%m-%d')
+            bought_stock = get_current_stock()
+            sql = f"INSERT INTO trade_log (date, bought_stock) VALUES ('{today}', '{bought_stock}')"\
+            f" ON DUPLICATE KEY UPDATE date='{today}'"
+            curs.execute(sql)
+            self.conn.commit()
+        return True
+
+    def trade_log_keep(self, keep):
+        global keep_list
+        str_today = datetime.now().strftime('%Y%m%d')
+        stocks = get_current_stock()
+        for s in stocks:
+            ohlc = get_ohlc(s['code'], 5)
+            if str_today == str(ohlc.iloc[0].name):
+                today_open = ohlc.iloc[0].open
+                lastday = ohlc.iloc[1]
+            else:
+                lastday = ohlc.iloc[0]
+                today_open = lastday[3]
+            current_price, ask_price, bid_price = get_current_price(s['code'])
+            if current_price > today_open*1.1:
+                keep_list.append(s['code'])
+        with self.conn.cursor() as curs:
+            today = datetime.now().strftime('%Y-%m-%d')
+            keep_stock = keep_list
+            sql = f"INSERT INTO trade_log (date, keep_stock) VALUES ('{today}', '{keep_stock}')"\
+            f" ON DUPLICATE KEY UPDATE date='{today}'"
+            curs.execute(sql)
+            self.conn.commit()
+        return True
+
+    def trade_log_end(self, initialTotal):
+        with self.conn.cursor() as curs:
+            today = datetime.now().strftime('%Y-%m-%d')
+            end_money = int(get_current_cash())
+            end_stock = get_current_stock()
+            end_total = int(get_current_total())
+            if end_total == 0 :
+                profit = 0
+            elif initialTotal == 0 :
+                profit = 0
+            else :
+                profit = (end_total-initialTotal)*100/end_total
+            sql = f"INSERT INTO trade_log (date, end_money, end_stock, end_total, profit)"\
+            f" VALUES ('{today}', '{end_money}', '{end_stock}', '{end_total}', '{profit}')"\
+            f" ON DUPLICATE KEY UPDATE date='{today}'"
+            curs.execute(sql)
+            self.conn.commit()
+        return True
+
+    def __del__(self):
+        self.conn.close()
 
     def get_buy_list(self):
         dayCheck = datetime.today().strftime('%Y-%m-%d')
@@ -27,37 +117,12 @@ class MarketDB:
         buyList = pd.read_sql(sql, self.conn)
         return buyList    #['A028300', 'A007570']
 
-    def check_withdrawal(self):
-        dayBefore = 1
-        while True:
-            yesterday = datetime.today()-timedelta(days=dayBefore)
-            dayCheck = yesterday.strftime('%Y-%m-%d')
-            sql = f"SELECT * FROM trade_log WHERE date = '{dayCheck}'"
-            keepList = pd.read_sql(sql, self.conn)
-            if dayBefore == 7:
-                return "None"
-            if keepList.empty:
-                dayBefore += 1
-            elif keepList.end_total[0] == "None" :
-                return "None"
-            else :
-                return keepList.end_total[0]
-
     def yesterday_keep_list(self):
-        dayBefore = 1
-        while True:
-            yesterday = datetime.today()-timedelta(days=dayBefore)
-            dayCheck = yesterday.strftime('%Y-%m-%d')
-            sql = f"SELECT * FROM trade_log WHERE date = '{dayCheck}'"
-            keepList = pd.read_sql(sql, self.conn)
-            if dayBefore == 7:
-                return "None"
-            if keepList.empty:
-                dayBefore += 1
-            elif keepList.keep_stock[0] == "None" :
-                return "None"
-            else :
-                return keepList.keep_stock[0]
+        yesterday = datetime.today()-timedelta(days=1)
+        dayCheck = yesterday.strftime('%Y-%m-%d')
+        sql = f"SELECT * FROM trade_log WHERE date = '{dayCheck}'"
+        keepList = pd.read_sql(sql, self.conn)
+        return keepList    #['A028300', 'A007570']
 
 slack = Slacker('xoxb-1398877919094-1406719016898-vSj7JEDRgOSEeK6MTDOygRng')
 def dbgout(message):
@@ -161,7 +226,7 @@ def get_stock_balance(code):
         elif code == 'Sell':
             sellCheck=True
             for k in keep_list:
-                if k == stock_code:
+                if stock_code == k:
                     sellCheck = False
             if sellCheck == True:
                 stocks.append({'code': stock_code, 'name': stock_name,
@@ -347,98 +412,18 @@ def sell_all():
     except Exception as ex:
         dbgout("sell_all() -> exception! " + str(ex))
 
-def trade_log_start():
-    db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
-    curs = db.cursor()
-    today = datetime.now().strftime('%Y-%m-%d')
-    start_money = int(get_current_cash())
-    get_stock = get_current_stock()
-    start_stock = []
-    for s in get_stock:
-        start_stock.append('"'+s['name']+'"')
-    start_total = int(get_current_total())
-    if str(MarketDB().check_withdrawal()) == 'None':
-        deposit_withdrawal = 0
-    else:
-        deposit_withdrawal = start_total - MarketDB().check_withdrawal()
-    sql = f"REPLACE INTO trade_log (date, start_money, start_stock, start_total, deposit_withdrawal)"\
-    f" VALUES ('{today}', '{start_money}', '{start_stock}', '{start_total}', '{deposit_withdrawal}')"
-    curs.execute(sql)
-    db.commit()
-    return True
-
-def trade_log_middle():
-    db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
-    curs = db.cursor()
-    today = datetime.now().strftime('%Y-%m-%d')
-    get_stock = get_current_stock()
-    bought_stock = []
-    for s in get_stock:
-        bought_stock.append('"'+s['name']+'"')
-    sql = f"REPLACE INTO trade_log (date, bought_stock) VALUES ('{today}', '{bought_stock}')"
-    curs.execute(sql)
-    db.commit()
-    return True
-
-def trade_log_keep():
-    global keep_list
-    keep_list=[]
-    str_today = datetime.now().strftime('%Y%m%d')
-    stocks = get_current_stock()
-    for s in stocks:
-        ohlc = get_ohlc(s['code'], 5)
-        if str_today == str(ohlc.iloc[0].name):
-            today_open = ohlc.iloc[0].open
-            lastday = ohlc.iloc[1]
-        else:
-            lastday = ohlc.iloc[0]
-            today_open = lastday[3]
-        current_price, ask_price, bid_price = get_current_price(s['code'])
-        if current_price > today_open*1.1:
-            keep_list.append('"'+s['code']+'"')
-    db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
-    curs = db.cursor()
-    today = datetime.now().strftime('%Y-%m-%d')
-    sql = f"REPLACE INTO trade_log (date, keep_stock) VALUES ('{today}', '{keep_list}')"
-    curs.execute(sql)
-    db.commit()
-    return True
-
-def trade_log_end(initialTotal):
-    db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
-    curs = db.cursor()
-    today = datetime.now().strftime('%Y-%m-%d')
-    end_money = int(get_current_cash())
-    get_stock = get_current_stock()
-    end_stock = []
-    keep_stock = []
-    for s in get_stock:
-        end_stock.append('"'+s['name']+'"')
-        keep_stock.append('"'+s['code']+'"')
-    end_total = int(get_current_total())
-    if end_total == 0 :
-        profit = 0
-    elif initialTotal == 0 :
-        profit = 0
-    else :
-        profit = (end_total-initialTotal)*100/end_total
-    sql = f"REPLACE INTO trade_log (date, keep_stock, end_money, end_stock, end_total, profit)"\
-    f" VALUES ('{today}', '{keep_stock}', '{end_money}', '{end_stock}', '{end_total}', '{profit}')"
-    curs.execute(sql)
-    db.commit()
-    return True
-
 if __name__ == '__main__':
     try:
         dbgout('`meeseeks_CreonOrder_ver_2.0 is running ~`')
         symbol_list = MarketDB().get_buy_list().list[0].split(',')
-        keep_list = []
-        if str(MarketDB().yesterday_keep_list()) == 'None':
+        if str(MarketDB().yesterday_keep_list().keep_stock[0]) == 'None':
+            keep_list = []
             bought_list = []
         else:
-            bought_list = MarketDB().yesterday_keep_list().split(',')
+            keep_list = MarketDB().yesterday_keep_list().keep_stock[0]
+            bought_list = MarketDB().yesterday_keep_list().keep_stock[0]
         target_buy_count = 5 # 매수할 종목 수
-        buy_percent = 1/target_buy_count - 0.01
+        buy_percent = 0.19
         printlog('check_creon_system() :', check_creon_system())  # 크레온 접속 점검
         stocks = get_stock_balance('ALL')      # 보유한 모든 종목 조회
         total_cash = int(get_current_cash())   # 100% 증거금 주문 가능 금액 조회
@@ -464,17 +449,18 @@ if __name__ == '__main__':
         while True:
             now = datetime.now()
             if t_log_start < now < t_9 and oneLoop == False:
-                if trade_log_start() == True:
+                if MarketDB().trade_log_start() == True:
                     oneLoop = True
             if t_9 < now < t_start and oneLoop == True:
                 if sell_all() == True:
                     oneLoop = False
+                    keep_list = []
                     dbgout('장시작 전 전량 매도 완료!')
                     time.sleep(2)
             if t_start < now < t_sell :  # AM 09:05 ~ PM 03:15 : 매수
                 if now.minute == 00 and 0 <= now.second <= 59:
                     alarm = get_stock_balance('ALL')
-                    trade_log_keep()
+                    MarketDB().trade_log_keep(keep_list)
                     time.sleep(60)
                 for sym in symbol_list:
                     if len(bought_list) < target_buy_count:
@@ -484,14 +470,14 @@ if __name__ == '__main__':
                             time.sleep(1)
                     else:
                         if oneLoop == False:
-                            if trade_log_middle() == True:
+                            if MarketDB().trade_log_middle() == True:
                                 oneLoop = True
             if t_sell < now < t_sell_end and oneLoop == True:  # PM 03:15 ~ PM 03:20 : 일괄 매도
                 if sell_all() == True:
                     dbgout('`매도 완료!`')
                     oneLoop = False
             if t_sell_end < now < t_exit and oneLoop == False:
-                if trade_log_end(initial_total) == True:
+                if MarketDB().trade_log_end(initial_total) == True:
                     oneLoop = True
             if t_exit < now:  # PM 03:30 ~ :프로그램 종료
                 dbgout('`프로그램을 종료합니다.`')

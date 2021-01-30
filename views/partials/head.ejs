@@ -1,0 +1,228 @@
+<heDeep Blackd>
+  <meta charset="utf-8">
+  <meta name="google-site-verification" content="MpCKID1gYpHp_P2bvgUT1Bne4h29qTfoUzaP60RirKE"/>
+  <meta name="google-site-verification" content="q6pNZ66RNj3oHrXHSJ3evngtHyIvScKJfjF8skbc_4k" />
+  <meta name="Keywords" content="blog,deepblack,programming,coding,bio">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta property="og:title" content="Golden Goose"/>
+  <meta name="Description" content="Goose's Blog"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://deepblack.info"/>
+  <link rel="icon" type="image/png" href="/image/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="57x57" href="/image/deepblack-57x57.png" />
+  <link rel="apple-touch-icon" sizes="72x72" href="/image/deepblack-72x72.png" />
+  <link rel="apple-touch-icon" sizes="114x114" href="/image/deepblack-114x114.png" />
+  <link rel="apple-touch-icon" sizes="144x144" href="/image/deepblack-144x144.png" />
+  <link rel="stylesheet" type="text/css" href="/css/main.css"/>
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/9.8.0/styles/atom-one-dark.min.css">
+  <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');ga('create', 'UA-88217824-1', 'auto');ga('send', 'pageview');</script>
+  <script src="/script/form/ckeditor.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+  <script type="text/javascript">if (typeof jQuery == 'undefined'){document.write(unescape("%3Cscript src='script/jquery.js' type='text/javascript'%3E%3C/script%3E"));}</script>
+  <script type="text/javascript">if (typeof jQuery.ui == 'undefined'){document.write(unescape("%3Cscript src='script/jquery-ui.js' type='text/javascript'%3E%3C/script%3E"));}</script>
+  <script type="text/javascript" src="/script/userform.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="//cdn.jsdelivr.net/highlight.js/9.8.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <link rel="manifest" href="/manifest/manifest.json">
+  <script src="//messaging-public.realtime.co/js/2.1.0/ortc.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/3.5.0/firebase.js"></script>
+  <script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBDys0NCMCPaWvxurzo7s_yJcwZZIQWkQ8",
+    authDomain: "deepblack-d1baa.firebaseapp.com",
+    databaseURL: "https://deepblack-d1baa.firebaseio.com",
+    storageBucket: "deepblack-d1baa.appspot.com",
+    messagingSenderId: "99579189523"
+  };
+  firebase.initializeApp(config);
+  </script>
+  <!-- END INITIALIZATION CODE -->
+
+  <script src="/script/WebPushManager.js"></script>
+  <title>Golden Goose</title></head>
+<body>
+  <div class="container">
+  <header class='fixHead'>
+    <h2><a id="hh" href="/">Goose Bot</a></h2>
+    <% if(user) {%>
+      <script>
+        var socket = io();
+        var channel = generateUserChannel();
+        $(document).ready(function() {
+          socket.emit('push', {
+              id : '<%= user._id %>',
+              channel : channel
+          });
+          // In this example we are using a demo Realtime application key without any security
+          // so you should replace it with your own appkey and follow the guidelines
+          // to configure it
+          var RealtimeAppKey = "zrO3Q9";
+          //var RealtimeAppKey = "K4xqxB";
+
+          // update the UI
+          // start Web Push Manager to obtain device id and register it with Realtime
+          // a service worker will be launched in background to receive the incoming push notifications
+          var webPushManager = new WebPushManager();
+
+          webPushManager.start(function(error, registrationId){
+            /*
+            if (error) {
+              if(error.message) {
+                alert(error.message);
+              } else {
+                alert("Ooops! It seems this browser doesn't support Web Push Notifications :(");
+              }
+            };
+            */
+            // connect to Realtime server
+            loadOrtcFactory(IbtRealTimeSJType, function (factory, error) {
+              if (error != null) {
+                console.log("Factory error: " + error.message);
+              } else {
+                 if (factory != null) {
+                    // Create Realtime Messaging client
+
+                    client = factory.createClient();
+                    client.setConnectionMetadata('Some connection metadata');
+                    client.setClusterUrl('https://ortc-developers.realtime.co/server/ssl/2.1/');
+
+                    client.onConnected = function (theClient) {
+                      // client is connected
+
+                      // subscribe users to their private channels
+                      theClient.subscribeWithNotifications(channel, true, registrationId,
+                         function (theClient, channel, msg) {
+                           // while you are browsing this page you'll be connected to Realtime
+                           // and receive messages directly in this callback
+                           // Since the service worker will only show a notification if the user
+                           // is not browsing your website you can force a push notification to be displayed.
+                           // For most use cases it would be better to change the website UI by showing a badge
+                           // or any other form of showing the user something changed instead
+                           // of showing a pop-up notification.
+                           // Also consider thar if the user has severals tabs opened it will see a notification for
+                           // each one ...
+                           webPushManager.forceNotification(msg);
+                         });
+                    };
+
+                    // Perform the connection
+                    client.connect(RealtimeAppKey, 'myAuthenticationToken');
+                 }
+               }
+            });
+          });
+      });
+
+      // generate a GUID
+      function S4() {
+        return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+      }
+
+      // generate the user private channel and save it at the local storage
+      // so we always use the same channel for each user
+      function generateUserChannel(){
+        userChannel = localStorage.getItem("channel");
+        if (userChannel == null || userChannel == "null"){
+            guid = (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();
+            userChannel = 'channel-' + guid;
+            localStorage.setItem("channel", userChannel);
+        }
+        return userChannel;
+      }
+      // send a message to the user private channel to trigger a push notification
+      function chatNotification(){
+        var myMessage = {
+                            body: "You have new messages",
+                            icon: 'image/deepblack.png',
+                            data: {
+                              click_url: '/chat'
+                            },
+                            tag: 'demo'
+                          };
+        socket.emit('NotificationList');
+        socket.on('List',function(data){
+          for(var i=0;i<data.list.length;i++){
+            if(data.list[i].class=="root"||data.list[i].class=="admin"){
+              if(data.list[i].chat!="join"&&data.list[i]._id!="<%= user._id %>"&&data.list[i].channel!="none"){
+                if (client) {
+                  client.send(data.list[i].channel, JSON.stringify(myMessage));
+                };
+              }
+            }
+          }
+        });
+      }
+      function postNotification(){
+        var myMessage = {
+                            body: "New post is uploaded",
+                            icon: 'image/deepblack.png',
+                            data: {
+                              click_url: '/code'
+                            },
+                            tag: 'demo'
+                          };
+        socket.emit('NotificationList');
+        socket.on('List',function(data){
+          for(var i=0;i<data.list.length;i++){
+            if(data.list[i]._id!="<%= user._id %>"&&data.list[i].channel!="none"){
+              if (client) {
+                client.send(data.list[i].channel, JSON.stringify(myMessage));
+              };
+            }
+          }
+        });
+      }
+      function diaryNotification(){
+        var myMessage = {
+                            body: "New diary is uploaded",
+                            icon: 'image/deepblack.png',
+                            data: {
+                              click_url: '/diary'
+                            },
+                            tag: 'demo'
+                          };
+        socket.emit('NotificationList');
+        socket.on('List',function(data){
+          for(var i=0;i<data.list.length;i++){
+            if(data.list[i]._id!="<%= user._id %>"&&data.list[i].channel!="none"){
+              if(data.list[i].class=="root"||data.list[i].class=="admin"){
+                if (client) {
+                  client.send(data.list[i].channel, JSON.stringify(myMessage));
+                };
+              }
+            }
+          }
+        });
+      }
+      function galleryNotification(){
+        var myMessage = {
+                            body: "New image is uploaded",
+                            icon: 'image/deepblack.png',
+                            data: {
+                              click_url: '/gallery'
+                            },
+                            tag: 'demo'
+                          };
+        socket.emit('NotificationList');
+        socket.on('List',function(data){
+          for(var i=0;i<data.list.length;i++){
+            if(data.list[i]._id!="<%= user._id %>"&&data.list[i].channel!="none"){
+              if(data.list[i].class=="root"||data.list[i].class=="admin"){
+                if (client) {
+                  client.send(data.list[i].channel, JSON.stringify(myMessage));
+                };
+              }
+            }
+          }
+        });
+      }
+      </script>
+    <% } %>
+</header>
+<% include ../partials/nav %>

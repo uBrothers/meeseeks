@@ -1,0 +1,16 @@
+</div>
+</br></br></br>
+</body>
+<footer id="footer">
+  <% if(user) {%>
+    <br>
+    <a href="/logout" id="hhh"><%= user.nickname %></a>
+    <p id="myIdHide" style="display:none"><%= user._id %></p>
+    <p id="nickHide" style="display:none"><%= user.nickname %></p>
+  <% } else { %>
+    <br>
+    <span class="tab">&#9;</span>
+    <span class="tab">&#9;</span>
+    <span class="tab">&#9;</span>
+  <% } %>
+</footer>

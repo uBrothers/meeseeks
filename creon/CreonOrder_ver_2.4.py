@@ -20,6 +20,30 @@ logger.addHandler(file_handler)
 class MarketDB:
     def __init__(self):
         self.conn = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
+        self.codes = {}
+        self.get_buy_list()
+        self.yesterday_keep_list()
+
+        with self.conn.cursor() as curs:
+            sql = """
+            CREATE TABLE IF NOT EXISTS trade_log (
+                date Date,
+                start_money BIGINT(20),
+                start_stock VARCHAR(20),
+                start_total BIGINT(20),
+                end_money BIGINT(20),
+                end_stock BIGINT(20),
+                bought_stock VARCHAR(20),
+                keep_stock VARCHAR(20),
+                end_total BIGINT(20),
+                profit BIGINT(20),
+                deposit_withdrawal VARCHAR(20),
+                PRIMARY KEY (date))
+            """
+            curs.execute(sql)
+
+    def __del__(self):
+        self.conn.close()
 
     def get_buy_list(self):
         dayCheck = datetime.today().strftime('%Y-%m-%d')
@@ -27,38 +51,20 @@ class MarketDB:
         buyList = pd.read_sql(sql, self.conn)
         return buyList    #['A028300', 'A007570']
 
-    def check_withdrawal(self):
-        dayBefore = 1
-        while True:
-            yesterday = datetime.today()-timedelta(days=dayBefore)
-            dayCheck = yesterday.strftime('%Y-%m-%d')
-            sql = f"SELECT * FROM trade_log WHERE date = '{dayCheck}'"
-            keepList = pd.read_sql(sql, self.conn)
-            if dayBefore == 7:
-                return "None"
-            if keepList.empty:
-                dayBefore += 1
-            elif keepList.end_total[0] == "None" :
-                return "None"
-            else :
-                return keepList.end_total[0]
-
     def yesterday_keep_list(self):
-        dayBefore = 1
         while True:
+            dayBefore = 1
             yesterday = datetime.today()-timedelta(days=dayBefore)
             dayCheck = yesterday.strftime('%Y-%m-%d')
             sql = f"SELECT * FROM trade_log WHERE date = '{dayCheck}'"
             keepList = pd.read_sql(sql, self.conn)
-            if dayBefore == 7:
-                return "None"
-            if keepList.empty:
+            if keepList.keep_stock[0] != 'None':
+                return keepList.keep_stock[0]    #['A028300', 'A007570']
+            elif dayBefore == 7:
+                keepList = []
+                return keepList
+            else:
                 dayBefore += 1
-            elif keepList.keep_stock[0] == "None" :
-                return "None"
-            else :
-                return keepList.keep_stock[0]
-
 slack = Slacker('xoxb-1398877919094-1406719016898-vSj7JEDRgOSEeK6MTDOygRng')
 def dbgout(message):
     """인자로 받은 문자열을 파이썬 셸과 슬랙으로 동시에 출력한다."""
@@ -161,7 +167,7 @@ def get_stock_balance(code):
         elif code == 'Sell':
             sellCheck=True
             for k in keep_list:
-                if k == stock_code:
+                if stock_code == k:
                     sellCheck = False
             if sellCheck == True:
                 stocks.append({'code': stock_code, 'name': stock_name,
@@ -352,15 +358,9 @@ def trade_log_start():
     curs = db.cursor()
     today = datetime.now().strftime('%Y-%m-%d')
     start_money = int(get_current_cash())
-    get_stock = get_current_stock()
-    start_stock = []
-    for s in get_stock:
-        start_stock.append('"'+s['name']+'"')
+    start_stock = get_current_stock()
     start_total = int(get_current_total())
-    if str(MarketDB().check_withdrawal()) == 'None':
-        deposit_withdrawal = 0
-    else:
-        deposit_withdrawal = start_total - MarketDB().check_withdrawal()
+    deposit_withdrawal = 0
     sql = f"REPLACE INTO trade_log (date, start_money, start_stock, start_total, deposit_withdrawal)"\
     f" VALUES ('{today}', '{start_money}', '{start_stock}', '{start_total}', '{deposit_withdrawal}')"
     curs.execute(sql)
@@ -371,18 +371,14 @@ def trade_log_middle():
     db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
     curs = db.cursor()
     today = datetime.now().strftime('%Y-%m-%d')
-    get_stock = get_current_stock()
-    bought_stock = []
-    for s in get_stock:
-        bought_stock.append('"'+s['name']+'"')
+    bought_stock = get_current_stock()
     sql = f"REPLACE INTO trade_log (date, bought_stock) VALUES ('{today}', '{bought_stock}')"
     curs.execute(sql)
     db.commit()
     return True
 
-def trade_log_keep():
+def trade_log_keep(keep):
     global keep_list
-    keep_list=[]
     str_today = datetime.now().strftime('%Y%m%d')
     stocks = get_current_stock()
     for s in stocks:
@@ -395,11 +391,12 @@ def trade_log_keep():
             today_open = lastday[3]
         current_price, ask_price, bid_price = get_current_price(s['code'])
         if current_price > today_open*1.1:
-            keep_list.append('"'+s['code']+'"')
+            keep_list.append(s['code'])
     db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
     curs = db.cursor()
     today = datetime.now().strftime('%Y-%m-%d')
-    sql = f"REPLACE INTO trade_log (date, keep_stock) VALUES ('{today}', '{keep_list}')"
+    keep_stock = keep_list
+    sql = f"REPLACE INTO trade_log (date, keep_stock) VALUES ('{today}', '{keep_stock}')"
     curs.execute(sql)
     db.commit()
     return True
@@ -409,12 +406,7 @@ def trade_log_end(initialTotal):
     curs = db.cursor()
     today = datetime.now().strftime('%Y-%m-%d')
     end_money = int(get_current_cash())
-    get_stock = get_current_stock()
-    end_stock = []
-    keep_stock = []
-    for s in get_stock:
-        end_stock.append('"'+s['name']+'"')
-        keep_stock.append('"'+s['code']+'"')
+    end_stock = get_current_stock()
     end_total = int(get_current_total())
     if end_total == 0 :
         profit = 0
@@ -422,8 +414,8 @@ def trade_log_end(initialTotal):
         profit = 0
     else :
         profit = (end_total-initialTotal)*100/end_total
-    sql = f"REPLACE INTO trade_log (date, keep_stock, end_money, end_stock, end_total, profit)"\
-    f" VALUES ('{today}', '{keep_stock}', '{end_money}', '{end_stock}', '{end_total}', '{profit}')"
+    sql = f"REPLACE INTO trade_log (date, end_money, end_stock, end_total, profit)"\
+    f" VALUES ('{today}', '{end_money}', '{end_stock}', '{end_total}', '{profit}')"
     curs.execute(sql)
     db.commit()
     return True
@@ -432,13 +424,14 @@ if __name__ == '__main__':
     try:
         dbgout('`meeseeks_CreonOrder_ver_2.0 is running ~`')
         symbol_list = MarketDB().get_buy_list().list[0].split(',')
-        keep_list = []
         if str(MarketDB().yesterday_keep_list()) == 'None':
+            keep_list = []
             bought_list = []
         else:
-            bought_list = MarketDB().yesterday_keep_list().split(',')
+            keep_list = MarketDB().yesterday_keep_list()
+            bought_list = MarketDB().yesterday_keep_list()
         target_buy_count = 5 # 매수할 종목 수
-        buy_percent = 1/target_buy_count - 0.01
+        buy_percent = 0.19
         printlog('check_creon_system() :', check_creon_system())  # 크레온 접속 점검
         stocks = get_stock_balance('ALL')      # 보유한 모든 종목 조회
         total_cash = int(get_current_cash())   # 100% 증거금 주문 가능 금액 조회
@@ -469,12 +462,13 @@ if __name__ == '__main__':
             if t_9 < now < t_start and oneLoop == True:
                 if sell_all() == True:
                     oneLoop = False
+                    keep_list = []
                     dbgout('장시작 전 전량 매도 완료!')
                     time.sleep(2)
             if t_start < now < t_sell :  # AM 09:05 ~ PM 03:15 : 매수
                 if now.minute == 00 and 0 <= now.second <= 59:
                     alarm = get_stock_balance('ALL')
-                    trade_log_keep()
+                    trade_log_keep(keep_list)
                     time.sleep(60)
                 for sym in symbol_list:
                     if len(bought_list) < target_buy_count:

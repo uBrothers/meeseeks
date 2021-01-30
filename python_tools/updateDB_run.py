@@ -42,6 +42,22 @@ class DBUpdater:
                 PRIMARY KEY (date))
             """
             curs.execute(sql)
+            sql = """
+            CREATE TABLE IF NOT EXISTS trade_log (
+                date Date,
+                start_money BIGINT(20),
+                start_stock VARCHAR(1000),
+                start_total BIGINT(20),
+                end_money BIGINT(20),
+                end_stock BIGINT(20),
+                bought_stock VARCHAR(1000),
+                keep_stock VARCHAR(1000),
+                end_total BIGINT(20),
+                profit BIGINT(20),
+                deposit_withdrawal BIGINT(20),
+                PRIMARY KEY (date))
+            """
+            curs.execute(sql)
         self.conn.commit()
         self.codes = dict()
 
@@ -146,7 +162,7 @@ class DBUpdater:
             self.replace_into_db(df, idx, code, self.codes[code])
 
     def execute_daily(self):
-        """실행 즉시 및 매일 오후 다섯시에 daily_price 테이블 업데이트"""
+        """실행 즉시 daily_price 테이블 업데이트"""
         self.update_comp_info()
 
         try:
@@ -159,25 +175,8 @@ class DBUpdater:
                 config = {'pages_to_fetch': 1}
                 json.dump(config, out_file)
         self.update_daily_price(pages_to_fetch)
-
-        tmnow = datetime.now()
-        lastday = calendar.monthrange(tmnow.year, tmnow.month)[1]
-        if tmnow.month == 12 and tmnow.day == lastday:
-            tmnext = tmnow.replace(year=tmnow.year+1, month=1, day=1,
-                hour=17, minute=0, second=0)
-        elif tmnow.day == lastday:
-            tmnext = tmnow.replace(month=tmnow.month+1, day=1, hour=17,
-                minute=0, second=0)
-        else:
-            tmnext = tmnow.replace(day=tmnow.day+1, hour=17, minute=0,
-                second=0)
-        tmdiff = tmnext - tmnow
-        secs = tmdiff.seconds
-        t = Timer(secs, self.execute_daily)
-        print("Waiting for next update ({}) ... ".format(tmnext.strftime
-            ('%Y-%m-%d %H:%M')))
-        slack.chat.post_message('#meeseeks-bot', 'updateDB Complete!')
-        t.start()
+        message = datetime.now().strftime('[%m/%d %H:%M:%S] ') + '`updateDB Complete!`'
+        slack.chat.post_message('#meeseeks-bot', message)
 
 if __name__ == '__main__':
     dbu = DBUpdater()

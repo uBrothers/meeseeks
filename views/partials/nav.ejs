@@ -1,0 +1,71 @@
+<style>
+.ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #757575;
+  width: 100%;
+}
+.li {
+  float: left;
+}
+.li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 7px 14px;
+  text-decoration: none;
+}
+.li a:hover {
+  background-color: #111;
+}
+.lib {
+  float: left;
+}
+.lib a {
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 7px 14px;
+  text-decoration: none;
+}
+.lib a:hover {
+  background-color: #111;
+  color: white;
+}
+.active {
+    background-color: #4CAF50;
+}
+.email{
+  background-color: #af4c4c;
+}
+.ssh{
+  background-color: #f781f3;
+}
+.note{
+  background-color: #ff8533;
+}
+.free{
+  background-color: #00ff00;
+}
+</style>
+<ul class="ul">
+  <% if(user) {%>
+    <% if(user.class=="root") {%>
+      <li class="li"><a href="/">Home</a></li>
+      <li class="lib"><a class="free" href="/free">Board</a></li>
+      <li class="li"><a class="cal" href="/calendar">Calendar</a></li>
+      <li class="li"><a class="gal" href="/gallery">Photos</a></li>
+      <li class="li"><a href="/account">Account</a></li>
+      <li class="li"><a href="/ftp">FTP</a></li>
+      <li class="li"><a class="active" href="/chat">CHAT</a></li>
+      <li class="li"><a class="ssh" href="/ssh">SSH</a></li>
+      <li class="li"><a class="note" href="/note">NOTE</a></li>
+      <li class="li"><a class="email" href="/email">EMAIL</a></li>
+    <% }else {%>
+      <li class="li"><a href="/">Home</a>
+      <li class="li"><a href="/free">Board</a></li>
+    <% } %>
+  <% } %>
+</ul>
