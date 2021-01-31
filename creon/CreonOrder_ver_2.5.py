@@ -59,7 +59,7 @@ class MarketDB:
             else :
                 return keepList.keep_stock[0]
 
-slack = Slacker('xoxb-1398877919094-1406719016898-ozAtWuIRJofRSV2y4moErAxR')
+slack = Slacker('xoxb-1398877919094-1406719016898-O96KhDYxl9ctweDr6UWmLmYN')
 def dbgout(message):
     """인자로 받은 문자열을 파이썬 셸과 슬랙으로 동시에 출력한다."""
     print(datetime.now().strftime('[%m/%d %H:%M:%S]'), message)
