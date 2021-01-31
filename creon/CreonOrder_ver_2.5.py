@@ -59,7 +59,7 @@ class MarketDB:
             else :
                 return keepList.keep_stock[0]
 
-slack = Slacker('xoxb-1398877919094-1406719016898-vSj7JEDRgOSEeK6MTDOygRng')
+slack = Slacker('xoxb-1398877919094-1406719016898-ozAtWuIRJofRSV2y4moErAxR')
 def dbgout(message):
     """인자로 받은 문자열을 파이썬 셸과 슬랙으로 동시에 출력한다."""
     print(datetime.now().strftime('[%m/%d %H:%M:%S]'), message)
@@ -430,7 +430,12 @@ def trade_log_end(initialTotal):
 
 if __name__ == '__main__':
     try:
-        dbgout('`meeseeks_CreonOrder_ver_2.0 is running ~`')
+        today = datetime.today().weekday()
+        if today == 5 or today == 6:  # 토요일이나 일요일이면 자동 종료
+            printlog('Today is ', 'Saturday.' if today == 5 else 'Sunday.')
+            dbgout('`WEEKEND -> 프로그램을 종료합니다.`')
+            sys.exit(0)
+        dbgout('`meeseeks_CreonOrder_ver_2.5 is running ~`')
         symbol_list = MarketDB().get_buy_list().list[0].split(',')
         keep_list = []
         if str(MarketDB().yesterday_keep_list()) == 'None':
@@ -456,11 +461,6 @@ if __name__ == '__main__':
         t_sell = t_now.replace(hour=15, minute=15, second=0, microsecond=0)
         t_sell_end = t_now.replace(hour=15, minute=20, second=0,microsecond=0)
         t_exit = t_now.replace(hour=15, minute=30, second=0,microsecond=0)
-        today = datetime.today().weekday()
-        if today == 5 or today == 6:  # 토요일이나 일요일이면 자동 종료
-            printlog('Today is ', 'Saturday.' if today == 5 else 'Sunday.')
-            dbgout('`WEEKEND -> 프로그램을 종료합니다.`')
-            sys.exit(0)
         while True:
             now = datetime.now()
             if t_log_start < now < t_9 and oneLoop == False:
