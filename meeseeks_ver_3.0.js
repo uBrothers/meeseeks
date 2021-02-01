@@ -1,9 +1,8 @@
 const moment = require('moment');
-const Slack = require('slack-node');
-const math = require('mathjs');
-const Discord = require('discord.js');
-const client = new Discord.Client();
-client.login('ODA1MzY2MzQ5MjExNTAwNTg0.YBZ13A.IUOPl3mw-HnyqDP5aWgrgKblYck');
+
+const { Webhook } = require('discord-webhook-node');
+const hook = new Webhook("https://discord.com/api/webhooks/805752996117217310/Fmun6CcX8N_co1Nbt4-vdmBJhU1nPzkj4tDQN5EgkEaDwG7Ded2rp1ooe_jl-_U5w9S5");
+
 var mysql = require('sync-mysql');
 var db = new mysql({
   host:'localhost',
@@ -48,6 +47,5 @@ for(var i=0; i<companyInfo.length; i++){
 
 var buySQL = 'INSERT INTO buy_list (list, date) VALUES ("'+buyList+'","'+date+'") ON DUPLICATE KEY UPDATE list="'+buyList+'", date="'+date+'"';
 db.query(buySQL);
-client.on('ready', () => {
-  client.channels.cache.get('805368618409525258').send('Node.js => 매수할 종목 분석 완료.').then(()=>{client.destroy();})
-})
+
+hook.send("[meeseeks_run.js] `종목 분석 및 업데이트 완료!`").then(() => console.log('Sent webhook to discord successfully!')).catch(err => console.log(err.message));
