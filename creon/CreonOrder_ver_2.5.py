@@ -64,7 +64,7 @@ def dbgout(message):
     """인자로 받은 문자열을 파이썬 셸과 슬랙으로 동시에 출력한다."""
     print(datetime.now().strftime('[%m/%d %H:%M:%S]'), message)
     strbuf = datetime.now().strftime('[%m/%d %H:%M:%S] ') + message
-    slack.chat.post_message('#meeseeks-bot', strbuf)
+    #slack.chat.post_message('#meeseeks-bot', strbuf)
     logger.info(strbuf)
 
 def printlog(message, *args):

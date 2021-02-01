@@ -2,20 +2,25 @@ import os, sys, ctypes
 import win32com.client
 import pandas as pd
 from datetime import datetime, timedelta
-from slacker import Slacker
 import time, calendar
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import pymysql
-import logging
 
+import logging
 logname = datetime.now().strftime("%Y-%m-%d")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler("../logs/"+logname+".log", encoding='utf-8')
 logger.addHandler(file_handler)
+
+import discord
+
+client = discord.Client()
+
+
 
 class MarketDB:
     def __init__(self):
@@ -59,12 +64,15 @@ class MarketDB:
             else :
                 return keepList.keep_stock[0]
 
-slack = Slacker('xoxb-1398877919094-1406719016898-O96KhDYxl9ctweDr6UWmLmYN')
 def dbgout(message):
     """인자로 받은 문자열을 파이썬 셸과 슬랙으로 동시에 출력한다."""
     print(datetime.now().strftime('[%m/%d %H:%M:%S]'), message)
     strbuf = datetime.now().strftime('[%m/%d %H:%M:%S] ') + message
-    slack.chat.post_message('#meeseeks-bot', strbuf)
+    @client.event
+    async def on_ready():
+       await client.get_channel(805368618409525258).send(strbuf)
+
+    client.run('ODA1MzY2MzQ5MjExNTAwNTg0.YBZ13A.IUOPl3mw-HnyqDP5aWgrgKblYck')
     logger.info(strbuf)
 
 def printlog(message, *args):
@@ -435,7 +443,7 @@ if __name__ == '__main__':
             printlog('Today is ', 'Saturday.' if today == 5 else 'Sunday.')
             dbgout('`WEEKEND -> 프로그램을 종료합니다.`')
             sys.exit(0)
-        dbgout('`meeseeks_CreonOrder_ver_2.5 is running ~`')
+        dbgout('`meeseeks_CreonOrder_ver_3.0 is running ~`')
         symbol_list = MarketDB().get_buy_list().list[0].split(',')
         keep_list = []
         if str(MarketDB().yesterday_keep_list()) == 'None':

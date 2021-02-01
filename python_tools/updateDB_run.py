@@ -4,8 +4,20 @@ import urllib, pymysql, calendar, time, json
 from urllib.request import Request, urlopen
 from datetime import datetime
 from threading import Timer
-from slacker import Slacker
-slack = Slacker('xoxb-1398877919094-1406719016898-vSj7JEDRgOSEeK6MTDOygRng')
+
+from discord.ext import commands
+from discord.ext.tasks import loop
+bot = commands.Bot(command_prefix='!')
+@loop(count=1)
+async def discord(msg):
+    channel = bot.get_channel(805368618409525258)
+    await channel.send(msg)
+@discord.before_loop
+async def before_discord():
+    await bot.wait_until_ready()  # Wait until bot is ready.
+@discord.after_loop
+async def after_discord():
+    await bot.logout()  # Make the bot log out.
 
 class DBUpdater:
     def __init__(self):
@@ -164,7 +176,6 @@ class DBUpdater:
     def execute_daily(self):
         """실행 즉시 daily_price 테이블 업데이트"""
         self.update_comp_info()
-
         try:
             with open('config.json', 'r') as in_file:
                 config = json.load(in_file)
@@ -176,7 +187,8 @@ class DBUpdater:
                 json.dump(config, out_file)
         self.update_daily_price(pages_to_fetch)
         message = datetime.now().strftime('[%m/%d %H:%M:%S] ') + '`updateDB Complete!`'
-        slack.chat.post_message('#meeseeks-bot', message)
+        discord.start(message)
+        bot.run('ODA1MzY2MzQ5MjExNTAwNTg0.YBZ13A.IUOPl3mw-HnyqDP5aWgrgKblYck')
 
 if __name__ == '__main__':
     dbu = DBUpdater()
