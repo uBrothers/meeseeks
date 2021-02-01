@@ -145,8 +145,10 @@ def get_stock_balance(code):
     if code == 'ALL':
         dbgout('계좌명 : ' + str(cpBalance.GetHeaderValue(0)))
         dbgout('예수금 : ' + str(cpBalance.GetHeaderValue(9)))
+        time.sleep(1)
         dbgout('결제잔고수량 : ' + str(cpBalance.GetHeaderValue(1)))
         dbgout('평가금액 : ' + str(cpBalance.GetHeaderValue(3)))
+        time.sleep(1)
         dbgout('평가손익 : ' + str(cpBalance.GetHeaderValue(4)))
         dbgout('종목수 : ' + str(cpBalance.GetHeaderValue(7)))
     stocks = []
@@ -155,6 +157,8 @@ def get_stock_balance(code):
         stock_name = cpBalance.GetDataValue(0, i)   # 종목명
         stock_qty = cpBalance.GetDataValue(15, i)   # 수량
         if code == 'ALL':
+            if i % 2 == 0:
+                time.sleep(1)
             dbgout(str(i+1) + ' ' + stock_code + '(' + stock_name + ')'
                 + ':' + str(stock_qty))
             stocks.append({'code': stock_code, 'name': stock_name,
@@ -436,7 +440,7 @@ if __name__ == '__main__':
             printlog('Today is ', 'Saturday.' if today == 5 else 'Sunday.')
             dbgout('`WEEKEND -> 프로그램을 종료합니다.`')
             sys.exit(0)
-        dbgout('`meeseeks_CreonOrder_ver_3.0 is running ~`')
+        dbgout('`CreonOrder_run.py is running ~`')
         symbol_list = MarketDB().get_buy_list().list[0].split(',')
         keep_list = []
         if str(MarketDB().yesterday_keep_list()) == 'None':
@@ -466,6 +470,7 @@ if __name__ == '__main__':
             now = datetime.now()
             if t_log_start < now < t_9 and oneLoop == False:
                 if trade_log_start() == True:
+                    dbgout('`trade_log_start`')
                     oneLoop = True
             if t_9 < now < t_start and oneLoop == True:
                 if sell_all() == True:
@@ -476,6 +481,7 @@ if __name__ == '__main__':
                 if now.minute == 00 and 0 <= now.second <= 59:
                     alarm = get_stock_balance('ALL')
                     trade_log_keep()
+                    dbgout('`trade_log_keep`')
                     time.sleep(60)
                 for sym in symbol_list:
                     if len(bought_list) < target_buy_count:
@@ -487,12 +493,14 @@ if __name__ == '__main__':
                         if oneLoop == False:
                             if trade_log_middle() == True:
                                 oneLoop = True
+                                dbgout('`trade_log_middle`')
             if t_sell < now < t_sell_end and oneLoop == True:  # PM 03:15 ~ PM 03:20 : 일괄 매도
                 if sell_all() == True:
                     dbgout('`매도 완료!`')
                     oneLoop = False
             if t_sell_end < now < t_exit and oneLoop == False:
                 if trade_log_end(initial_total) == True:
+                    dbgout('`trade_log_end`')
                     oneLoop = True
             if t_exit < now:  # PM 03:30 ~ :프로그램 종료
                 dbgout('`프로그램을 종료합니다.`')
