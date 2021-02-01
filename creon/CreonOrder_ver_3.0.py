@@ -16,19 +16,8 @@ logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler("../logs/"+logname+".log", encoding='utf-8')
 logger.addHandler(file_handler)
 
-from discord.ext import commands
-from discord.ext.tasks import loop
-bot = commands.Bot(command_prefix='!')
-@loop(count=1)
-async def discord(msg):
-    channel = bot.get_channel(805368618409525258)
-    await channel.send(msg)
-@discord.before_loop
-async def before_discord():
-    await bot.wait_until_ready()  # Wait until bot is ready.
-@discord.after_loop
-async def after_discord():
-    await bot.logout()  # Make the bot log out.
+from discord_webhook import DiscordWebhook
+webhook='https://discord.com/api/webhooks/805752996117217310/Fmun6CcX8N_co1Nbt4-vdmBJhU1nPzkj4tDQN5EgkEaDwG7Ded2rp1ooe_jl-_U5w9S5'
 
 class MarketDB:
     def __init__(self):
@@ -76,8 +65,7 @@ def dbgout(message):
     """인자로 받은 문자열을 파이썬 셸과 슬랙으로 동시에 출력한다."""
     print(datetime.now().strftime('[%m/%d %H:%M:%S]'), message)
     strbuf = datetime.now().strftime('[%m/%d %H:%M:%S] ') + message
-    discord.start(strbuf)
-    bot.run('ODA1MzY2MzQ5MjExNTAwNTg0.YBZ13A.IUOPl3mw-HnyqDP5aWgrgKblYck')
+    DiscordWebhook(url=webhook, content=strbuf).execute()
     logger.info(strbuf)
 
 def printlog(message, *args):

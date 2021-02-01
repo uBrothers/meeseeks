@@ -1,20 +1,3 @@
-
-import discord
-def main():
-    client = discord.Client()
-
-    token = "ODA1MzY2MzQ5MjExNTAwNTg0.YBZ13A.IUOPl3mw-HnyqDP5aWgrgKblYck"
-
-
-    # 봇이 새로운 메시지를 수신했을때 동작되는 코드
-    @client.event
-    async def on_message(message):
-        channel = message.channel #
-        message.channel.id = '805368618409525258'
-
-        await client.send_message(message.channel, "시발")
-
-    #client 실행
-    client.run(token)
-if __name__ == '__main__':
-    main()
+from discord_webhook import DiscordWebhook
+webhook='https://discord.com/api/webhooks/805752996117217310/Fmun6CcX8N_co1Nbt4-vdmBJhU1nPzkj4tDQN5EgkEaDwG7Ded2rp1ooe_jl-_U5w9S5'
+DiscordWebhook(url=webhook, content='Webhook Message').execute()

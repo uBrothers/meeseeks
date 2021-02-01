@@ -4,20 +4,8 @@ import urllib, pymysql, calendar, time, json
 from urllib.request import Request, urlopen
 from datetime import datetime
 from threading import Timer
-
-from discord.ext import commands
-from discord.ext.tasks import loop
-bot = commands.Bot(command_prefix='!')
-@loop(count=1)
-async def discord(msg):
-    channel = bot.get_channel(805368618409525258)
-    await channel.send(msg)
-@discord.before_loop
-async def before_discord():
-    await bot.wait_until_ready()  # Wait until bot is ready.
-@discord.after_loop
-async def after_discord():
-    await bot.logout()  # Make the bot log out.
+from discord_webhook import DiscordWebhook
+webhook='https://discord.com/api/webhooks/805752996117217310/Fmun6CcX8N_co1Nbt4-vdmBJhU1nPzkj4tDQN5EgkEaDwG7Ded2rp1ooe_jl-_U5w9S5'
 
 class DBUpdater:
     def __init__(self):
@@ -187,8 +175,8 @@ class DBUpdater:
                 json.dump(config, out_file)
         self.update_daily_price(pages_to_fetch)
         message = datetime.now().strftime('[%m/%d %H:%M:%S] ') + '`updateDB Complete!`'
-        discord.start(message)
-        bot.run('ODA1MzY2MzQ5MjExNTAwNTg0.YBZ13A.IUOPl3mw-HnyqDP5aWgrgKblYck')
+        DiscordWebhook(url=webhook, content=message).execute()
+
 
 if __name__ == '__main__':
     dbu = DBUpdater()
