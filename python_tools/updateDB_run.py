@@ -49,7 +49,7 @@ class DBUpdater:
                 start_stock VARCHAR(1000),
                 start_total BIGINT(20),
                 end_money BIGINT(20),
-                end_stock BIGINT(20),
+                end_stock VARCHAR(1000),
                 bought_stock VARCHAR(1000),
                 keep_stock VARCHAR(1000),
                 end_total BIGINT(20),

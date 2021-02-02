@@ -380,7 +380,7 @@ def trade_log_middle():
     bought_stock = []
     for s in get_stock:
         bought_stock.append('"'+s['name']+'"')
-    sql = f"REPLACE INTO trade_log (date, bought_stock) VALUES ('{today}', '{bought_stock}')"
+    sql = f"UPDATE trade_log SET bought_stock='{bought_stock}' WHERE date = '{today}'"
     curs.execute(sql)
     db.commit()
     return True
@@ -404,7 +404,7 @@ def trade_log_keep():
     db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
     curs = db.cursor()
     today = datetime.now().strftime('%Y-%m-%d')
-    sql = f"REPLACE INTO trade_log (date, keep_stock) VALUES ('{today}', '{keep_list}')"
+    sql = f"UPDATE trade_log SET keep_stock='{keep_list}' WHERE date = '{today}'"
     curs.execute(sql)
     db.commit()
     return True
@@ -427,8 +427,8 @@ def trade_log_end(initialTotal):
         profit = 0
     else :
         profit = (end_total-initialTotal)*100/end_total
-    sql = f"REPLACE INTO trade_log (date, keep_stock, end_money, end_stock, end_total, profit)"\
-    f" VALUES ('{today}', '{keep_stock}', '{end_money}', '{end_stock}', '{end_total}', '{profit}')"
+    sql = f"UPDATE trade_log SET keep_stock='{keep_stock}', end_money='{end_money}', end_stock='{end_stock}', end_total='{end_total}', profit='{profit}'"\
+    f" WHERE date = '{today}'"
     curs.execute(sql)
     db.commit()
     return True
