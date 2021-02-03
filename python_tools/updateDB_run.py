@@ -53,7 +53,7 @@ class DBUpdater:
                 bought_stock VARCHAR(1000),
                 keep_stock VARCHAR(1000),
                 end_total BIGINT(20),
-                profit BIGINT(20),
+                profit FLOAT(12),
                 deposit_withdrawal BIGINT(20),
                 PRIMARY KEY (date))
             """

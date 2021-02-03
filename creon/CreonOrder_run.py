@@ -229,7 +229,7 @@ def get_target_price(code):
             today_open = lastday[3]
         lastday_high = lastday[1]
         lastday_low = lastday[2]
-        target_price = today_open * 1.01
+        target_price = today_open * 1.04
         return target_price
     except Exception as ex:
         dbgout("`get_target_price() -> exception! " + str(ex) + "`")
@@ -399,7 +399,7 @@ def trade_log_keep():
             lastday = ohlc.iloc[0]
             today_open = lastday[3]
         current_price, ask_price, bid_price = get_current_price(s['code'])
-        if current_price > today_open*1.1:
+        if current_price > today_open*1.05:
             keep_list.append('"'+s['code']+'"')
     db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
     curs = db.cursor()
