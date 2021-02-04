@@ -366,6 +366,8 @@ def trade_log_start():
         deposit_withdrawal = 0
     else:
         deposit_withdrawal = start_total - MarketDB().check_withdrawal()
+    start_stock=start_stock.replace("[", "")
+    start_stock=start_stock.replace("]", "")
     sql = f"REPLACE INTO trade_log (date, start_money, start_stock, start_total, deposit_withdrawal)"\
     f" VALUES ('{today}', '{start_money}', '{start_stock}', '{start_total}', '{deposit_withdrawal}')"
     curs.execute(sql)
@@ -380,6 +382,8 @@ def trade_log_middle():
     bought_stock = []
     for s in get_stock:
         bought_stock.append('"'+s['name']+'"')
+    bought_stock=bought_stock.replace("[", "")
+    bought_stock=bought_stock.replace("]", "")
     sql = f"UPDATE trade_log SET bought_stock='{bought_stock}' WHERE date = '{today}'"
     curs.execute(sql)
     db.commit()
@@ -401,6 +405,11 @@ def trade_log_keep():
         current_price, ask_price, bid_price = get_current_price(s['code'])
         if current_price > today_open*1.05:
             keep_list.append('"'+s['code']+'"')
+    if str(MarketDB().yesterday_keep_list()) == '[]':
+        keep_list = "None"
+    else:
+        keep_list=keep_list.replace("[", "")
+        keep_list=keep_list.replace("]", "")
     db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
     curs = db.cursor()
     today = datetime.now().strftime('%Y-%m-%d')
@@ -427,6 +436,13 @@ def trade_log_end(initialTotal):
         profit = 0
     else :
         profit = (end_total-initialTotal)*100/end_total
+    end_stock=end_stock.replace("[", "")
+    end_stock=end_stock.replace("]", "")
+    if str(MarketDB().yesterday_keep_list()) == '[]':
+        keep_stock = "None"
+    else:
+        keep_stock=keep_stock.replace("[", "")
+        keep_stock=keep_stock.replace("]", "")
     sql = f"UPDATE trade_log SET keep_stock='{keep_stock}', end_money='{end_money}', end_stock='{end_stock}', end_total='{end_total}', profit='{profit}'"\
     f" WHERE date = '{today}'"
     curs.execute(sql)
