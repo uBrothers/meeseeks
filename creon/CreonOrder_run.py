@@ -366,6 +366,7 @@ def trade_log_start():
         deposit_withdrawal = 0
     else:
         deposit_withdrawal = start_total - MarketDB().check_withdrawal()
+    start_stock=str(start_stock)
     start_stock=start_stock.replace("[", "")
     start_stock=start_stock.replace("]", "")
     sql = f"REPLACE INTO trade_log (date, start_money, start_stock, start_total, deposit_withdrawal)"\
@@ -382,6 +383,7 @@ def trade_log_middle():
     bought_stock = []
     for s in get_stock:
         bought_stock.append('"'+s['name']+'"')
+    bought_stock=str(bought_stock)
     bought_stock=bought_stock.replace("[", "")
     bought_stock=bought_stock.replace("]", "")
     sql = f"UPDATE trade_log SET bought_stock='{bought_stock}' WHERE date = '{today}'"
@@ -405,7 +407,8 @@ def trade_log_keep():
         current_price, ask_price, bid_price = get_current_price(s['code'])
         if current_price > today_open*1.05:
             keep_list.append('"'+s['code']+'"')
-    if str(MarketDB().yesterday_keep_list()) == '[]':
+    keep_list=str(keep_list)
+    if keep_list == '[]':
         keep_list = "None"
     else:
         keep_list=keep_list.replace("[", "")
@@ -435,10 +438,12 @@ def trade_log_end(initialTotal):
     elif initialTotal == 0 :
         profit = 0
     else :
-        profit = (end_total-initialTotal)*100/end_total
+        profit = (end_total-initialTotal)*100/initialTotal
+    end_stock=str(end_stock)
     end_stock=end_stock.replace("[", "")
     end_stock=end_stock.replace("]", "")
-    if str(MarketDB().yesterday_keep_list()) == '[]':
+    keep_stock=str(keep_stock)
+    if keep_stock == '[]':
         keep_stock = "None"
     else:
         keep_stock=keep_stock.replace("[", "")
@@ -463,6 +468,7 @@ if __name__ == '__main__':
             bought_list = []
         else:
             bought_list = MarketDB().yesterday_keep_list().split(',')
+        count_check = False
         target_buy_count = 5 # 매수할 종목 수
         buy_percent = 1/target_buy_count - 0.01
         printlog('check_creon_system() :', check_creon_system())  # 크레온 접속 점검
@@ -507,9 +513,12 @@ if __name__ == '__main__':
                             time.sleep(1)
                     else:
                         if oneLoop == False:
-                            if trade_log_middle() == True:
-                                oneLoop = True
-                                dbgout('`trade_log_middle`')
+                            if count_check == True:
+                                if trade_log_middle() == True:
+                                    oneLoop = True
+                                    dbgout('`trade_log_middle`')
+                            else:
+                                count_check = True
             if t_sell < now < t_sell_end and oneLoop == True:  # PM 03:15 ~ PM 03:20 : 일괄 매도
                 if sell_all() == True:
                     dbgout('`매도 완료!`')
