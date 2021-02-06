@@ -469,8 +469,8 @@ if __name__ == '__main__':
         else:
             bought_list = MarketDB().yesterday_keep_list().split(',')
         count_check = False
-        target_buy_count = 5 # 매수할 종목 수
-        buy_percent = 1/target_buy_count - 0.01
+        target_buy_count = 5-len(bought_list) # 매수할 종목 수
+        buy_percent = 0.95/target_buy_count
         printlog('check_creon_system() :', check_creon_system())  # 크레온 접속 점검
         stocks = get_stock_balance('ALL')      # 보유한 모든 종목 조회
         total_cash = int(get_current_cash())   # 100% 증거금 주문 가능 금액 조회
