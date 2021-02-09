@@ -1,56 +1,19 @@
 <!DOCTYPE html>
 <html>
-    <% include ../partials/head %>
-    <a>시작가격 : 90060&nbsp;&nbsp;&nbsp;&nbsp;( 2020-2-23 22:32 )&nbsp;gooseBot_Ver_05</a><br>
-    <a>시작가격 : 79721&nbsp;&nbsp;&nbsp;&nbsp;( 2020-2-24 20:43 )&nbsp;gooseBot_Ver_06</a><br>
-    <a>시작가격 : 75809&nbsp;&nbsp;&nbsp;&nbsp;( 2020-2-25 23:28 )&nbsp;gooseBot_Ver_05_1&nbsp;05에서 추매 뺌</a><br>
-    <a>시작가격 : 73249&nbsp;&nbsp;&nbsp;&nbsp;( 2020-2-26 20:10 )&nbsp;gooseBot_ver_05_2&nbsp;05에서 추매 & 하락 뺌</a>
-    <h2>Balance : <%= bal[0].balance %> </h2>
-    <style>
-    table {
-      width: 100%;
-    }
-    table, th, td {
-      border-top: 1px solid #444444;
-      border-collapse: collapse;
-    }
-    table {
-      margin-left: auto;
-      margin-right: auto;
-    }
-    th, td {
-      border-bottom: 1px solid #444444;
-      padding: 10px;
-      text-align: center;
-    }
-    thead tr {
-      background-color: #0d47a1;
-      color: #ffffff;
-    }
-    tbody tr:nth-child(2n) {
-      background-color: #bbdefb;
-    }
-    tbody tr:nth-child(2n+1) {
-      background-color: #e3f2fd;
-    }
-  </style>
+
     <table>
-      <thead>
-        <tr>
-          <th>Option</th><th>Position</th><th>Price</th><th>Volume</th><th>Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% data.forEach(function(data){ %>
-          <tr>
-            <%if(data.option=="maker"){%>
-	    <td style="color:red;font-weight:bold;">매수</td><td style="color:#E69018;font-weight:bold;"><%= data.position %></td><td><%= data.price %></td><td><%= data.amount %></td><td><%= data.time %></td>
-            <%}else{%>
-	    <td style="color:blue;font-weight:bold;">매도</td><td style="color:#E69018;font-weight:bold;"><%= data.position %></td><td><%= data.price %></td><td><%= data.amount %></td><td><%= data.time %></td>
-            <%}%>
-          </tr>
-        <% }) %>
-      </tbody>
+        <thead>
+            <tr>
+                <th>날짜</th><th>시작 예수금</th><th>시작 보유주식</th><th>시작 총자산</th><th>매수 주식</th><th>끝 보유주식</th><th>끝 총자산</th><th>당일 손익</th><th>입출금</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% data.forEach(function(datum){ %>
+                <tr>
+                    <td><%= datum.date.split('T15:00:00.000Z') %></td><td><%= datum.start_money %></td><td><%= datum.start_stock %></td><td><%= datum.start_total %></td><td><%= datum.bought_stock %></td><td><%= datum.end_stock %></td><td><%= datum.end_total %></td><td><%= datum.profit %></td><td><%= datum.deposit_withdrawal %></td>
+                </tr>
+            <% }) %>
+        </tbody>
     </table>
-    <% include ../partials/footer %>
+
 </html>
