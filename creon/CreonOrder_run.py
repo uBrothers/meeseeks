@@ -169,13 +169,13 @@ def get_stock_balance(code):
             sellCheck=True
             for k in keep_list:
                 if k == stock_code:
-					dbgout(k)
-					time.sleep(1)
-					dbgout(stock_code)
+                    dbgout(k)
+                    time.sleep(1)
+                    dbgout(stock_code)
                     sellCheck = False
             if sellCheck == True:
-				time.sleep(1)
-				dbgout(stock_name)
+                time.sleep(1)
+                dbgout(stock_name)
                 stocks.append({'code': stock_code, 'name': stock_name,
                     'qty': stock_qty})
         if stock_code == code:
@@ -308,7 +308,7 @@ def buy_stock(code):
                         return False
                     else:
                         bought_list.append(code)
-						dbgout(len(bought_list))
+                        dbgout(len(bought_list))
                         dbgout("`매수 완료 : "+ str(stock_name) + ", 수량 : " + str(buy_qty) + "`")
                         time.sleep(2)
                         return True
@@ -424,7 +424,7 @@ def trade_log_keep():
     db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
     curs = db.cursor()
     today = datetime.now().strftime('%Y-%m-%d')
-	dbgout(keep_list)
+    dbgout(keep_list)
     sql = f"UPDATE trade_log SET keep_stock='{keep_list}' WHERE date = '{today}'"
     curs.execute(sql)
     db.commit()
@@ -458,7 +458,7 @@ def trade_log_end(initialTotal):
     else:
         keep_stock=keep_stock.replace("[", "")
         keep_stock=keep_stock.replace("]", "")
-	dbgout(keep_stock)
+    dbgout(keep_stock)
     sql = f"UPDATE trade_log SET keep_stock='{keep_stock}', end_money='{end_money}', end_stock='{end_stock}', end_total='{end_total}', profit='{profit}'"\
     f" WHERE date = '{today}'"
     curs.execute(sql)
@@ -527,7 +527,7 @@ if __name__ == '__main__':
                             if count_check == True:
                                 if trade_log_middle() == True:
                                     oneLoop = True
-									dbgout(len(bought_list))
+                                    dbgout(len(bought_list))
                                     dbgout('`trade_log_middle`')
                             else:
                                 count_check = True
