@@ -399,14 +399,14 @@ def trade_log_keep():
     str_today = datetime.now().strftime('%Y%m%d')
     stocks = get_current_stock()
     for s in stocks:
-        ohlc = get_ohlc('"'+s['code']+'"', 5)
+        ohlc = get_ohlc(s['code'], 5)
         if str_today == str(ohlc.iloc[0].name):
             today_open = ohlc.iloc[0].open
             lastday = ohlc.iloc[1]
         else:
             lastday = ohlc.iloc[0]
             today_open = lastday[3]
-        current_price, ask_price, bid_price = get_current_price('"'+s['code']+'"')
+        current_price, ask_price, bid_price = get_current_price(s['code'])
         if current_price > today_open * 1.05:
             keep_list.append('"'+s['code']+'"')
     keep_list=str(keep_list)
