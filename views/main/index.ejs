@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 
+  <link rel="stylesheet" type="text/css" href="/css/main.css"/>
     <table>
         <thead>
             <tr>
@@ -10,7 +11,7 @@
         <tbody>
             <% data.forEach(function(datum){ %>
                 <tr>
-                    <td><%= datum.date.split('T15:00:00.000Z') %></td><td><%= datum.start_money %></td><td><%= datum.start_stock %></td><td><%= datum.start_total %></td><td><%= datum.bought_stock %></td><td><%= datum.end_stock %></td><td><%= datum.end_total %></td><td><%= datum.profit %></td><td><%= datum.deposit_withdrawal %></td>
+                    <td><%= datum.date.split('T15:00:00.000Z')[0] %></td><td><%= datum.start_money %></td><td><%= datum.start_stock %></td><td><%= datum.start_total %></td><td><%= datum.bought_stock %></td><td><%= datum.end_stock %></td><td><%= datum.end_total %></td><td><%= datum.profit %></td><td><%= datum.deposit_withdrawal %></td>
                 </tr>
             <% }) %>
         </tbody>
