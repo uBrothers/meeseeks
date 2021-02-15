@@ -1,3 +1,8 @@
+html{
+    background-color: #000000;
+    color: #00ff00;
+}
+
 table, th, td{
     border: 1px solid #00ff00;
 }
@@ -7,6 +12,7 @@ table{
 }
 
 th{
+    width: 10%;
     text-align: center;
 }
 
