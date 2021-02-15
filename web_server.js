@@ -3,9 +3,8 @@ var app      = express();
 var server = require('http').createServer(app);
 var path     = require('path');
 var contentDisposition = require('content-disposition');
-var scan = require('./scan');
 var bodyParser     = require('body-parser');
-var date = require('date-utils');
+var moment = require('moment');
 var flash    = require('connect-flash');
 var bodyParser     = require('body-parser');
 var methodOverride = require('method-override');
@@ -32,9 +31,9 @@ app.use(flash());
 
 app.get('/', function(req, res){
     var trade_log = db.query('SELECT * FROM trade_log ORDER BY date DESC');
-    res.render("main/index",{data:trade_log});
+    res.render("main/index",{data:trade_log, moment:moment});
 });
 
-server.listen(8888, function(){
+server.listen(80, function(){
   console.log('Http Server On!');
 });
