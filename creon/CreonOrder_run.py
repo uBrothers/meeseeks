@@ -523,7 +523,7 @@ if __name__ == '__main__':
                     dbgout('`trade_log_keep`')
                     time.sleep(60)
                 for sym in symbol_list:
-                    if len(bought_list) < target_buy_count:
+                    if 0 < target_buy_count:
                         if buy_stock(sym) == True:
                             time.sleep(1)
                         else:
