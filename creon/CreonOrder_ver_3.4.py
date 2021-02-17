@@ -168,7 +168,7 @@ def get_stock_balance(code):
                 time.sleep(1)
             sellCheck=True
             for k in keep_list:
-                if str(k) == str(stock_code):
+                if k == str(stock_code):
                     dbgout(str(k))
                     time.sleep(1)
                     dbgout("keep stock!!!")
@@ -385,28 +385,13 @@ def trade_log_start():
     db.commit()
     return True
 
-def trade_log_middle():
-    db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
-    curs = db.cursor()
-    today = datetime.now().strftime('%Y-%m-%d')
-    get_stock = get_current_stock()
-    bought_stock = []
-    for s in get_stock:
-        bought_stock.append('"'+s['name']+'"')
-    bought_stock=str(bought_stock)
-    bought_stock=bought_stock.replace("[", "")
-    bought_stock=bought_stock.replace("]", "")
-    sql = f"UPDATE trade_log SET bought_stock='{bought_stock}' WHERE date = '{today}'"
-    curs.execute(sql)
-    db.commit()
-    return True
-
 def trade_log_keep():
-    global keep_list
     keep_list=[]
+    bought_stock = []
     str_today = datetime.now().strftime('%Y%m%d')
     stocks = get_current_stock()
     for s in stocks:
+        bought_stock.append('"'+s['name']+'"')
         ohlc = get_ohlc(s['code'], 5)
         if str_today == str(ohlc.iloc[0].name):
             today_open = ohlc.iloc[0].open
@@ -417,6 +402,10 @@ def trade_log_keep():
         current_price, ask_price, bid_price = get_current_price(s['code'])
         if current_price > today_open * 1.05:
             keep_list.append('"'+s['code']+'"')
+    bought_stock=str(bought_stock)
+    bought_stock=bought_stock.replace("[", "")
+    bought_stock=bought_stock.replace("]", "")
+    keep = keep_list
     keep_list=str(keep_list)
     if keep_list == '[]':
         keep_list = "None"
@@ -427,10 +416,10 @@ def trade_log_keep():
     curs = db.cursor()
     today = datetime.now().strftime('%Y-%m-%d')
     dbgout(keep_list)
-    sql = f"UPDATE trade_log SET keep_stock='{keep_list}' WHERE date = '{today}'"
+    sql = f"UPDATE trade_log SET keep_stock='{keep_list}', bought_stock='{bought_stock}' WHERE date = '{today}'"
     curs.execute(sql)
     db.commit()
-    return True
+    return keep
 
 def trade_log_end(initialTotal):
     db = pymysql.connect(host='localhost',user='root',password='password',db='meeseeks',charset='utf8')
@@ -481,7 +470,6 @@ if __name__ == '__main__':
             bought_list = []
         else:
             bought_list = MarketDB().yesterday_keep_list().split(',')
-        count_check = False
         target_buy_count = 5-len(bought_list) # 매수할 종목 수
         buy_percent = 0.95/target_buy_count
         printlog('check_creon_system() :', check_creon_system())  # 크레온 접속 점검
@@ -519,7 +507,7 @@ if __name__ == '__main__':
             if t_start < now < t_sell :  # AM 09:05 ~ PM 03:15 : 매수
                 if now.minute == 00 and 0 <= now.second <= 59:
                     alarm = get_stock_balance('ALL')
-                    trade_log_keep()
+                    keep_list = trade_log_keep()
                     dbgout('`trade_log_keep`')
                     time.sleep(60)
                 for sym in symbol_list:
@@ -530,14 +518,7 @@ if __name__ == '__main__':
                             time.sleep(1)
                     else:
                         if oneLoop == False:
-                            time.sleep(300)
-                            if count_check == True:
-                                if trade_log_middle() == True:
-                                    oneLoop = True
-                                    dbgout(str(len(bought_list)))
-                                    dbgout('`trade_log_middle`')
-                            else:
-                                count_check = True
+                             oneLoop = True
             if t_sell < now < t_sell_end and oneLoop == True:  # PM 03:15 ~ PM 03:20 : 일괄 매도
                 if sell_all() == True:
                     dbgout('`매도 완료!`')
