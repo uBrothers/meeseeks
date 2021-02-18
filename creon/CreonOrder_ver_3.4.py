@@ -168,7 +168,9 @@ def get_stock_balance(code):
                 time.sleep(1)
             sellCheck=True
             for k in keep_list:
-                if k == str(stock_code):
+                dbgout(str(stock_code))
+                dbgout(str(k))
+                if str(k) == str(stock_code):
                     dbgout(str(k))
                     time.sleep(1)
                     dbgout("keep stock!!!")
@@ -260,6 +262,7 @@ def buy_stock(code):
     """인자로 받은 종목을 매수한다."""
     try:
         global bought_list      # 함수 내에서 값 변경을 하기 위해 global로 지정
+        global buy_count
         if code in bought_list: # 매수 완료 종목이면 더 이상 안 사도록 함수 종료
             printlog('이미 매수한 종목입니다.')
             return False
@@ -304,8 +307,9 @@ def buy_stock(code):
                         time.sleep(remain_time/1000)
                         return False
                     else:
+                        buy_count += 1
                         bought_list.append(code)
-                        dbgout(str(len(bought_list)))
+                        dbgout(str(buy_count))
                         dbgout("`매수 완료 : "+ str(stock_name) + ", 수량 : " + str(buy_qty) + "`")
                         time.sleep(2)
                         return True
@@ -466,11 +470,16 @@ if __name__ == '__main__':
         dbgout('`CreonOrder_run.py is running ~`')
         symbol_list = MarketDB().get_buy_list().list[0].split(',')
         keep_list = []
+        buy_count = 0
         if str(MarketDB().yesterday_keep_list()) == 'None':
             bought_list = []
         else:
             bought_list = MarketDB().yesterday_keep_list().split(',')
-        target_buy_count = 5-len(bought_list) # 매수할 종목 수
+        keep_list = bought_list
+        if len(bought_list) > 4:
+            target_buy_count = 1
+        else:
+            target_buy_count = 5-len(bought_list) # 매수할 종목 수
         buy_percent = 0.95/target_buy_count
         printlog('check_creon_system() :', check_creon_system())  # 크레온 접속 점검
         stocks = get_stock_balance('ALL')      # 보유한 모든 종목 조회
@@ -511,7 +520,7 @@ if __name__ == '__main__':
                     dbgout('`trade_log_keep`')
                     time.sleep(60)
                 for sym in symbol_list:
-                    if 0 < target_buy_count:
+                    if buy_count < target_buy_count:
                         if buy_stock(sym) == True:
                             time.sleep(1)
                         else:
