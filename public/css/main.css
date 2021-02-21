@@ -19,3 +19,10 @@ th{
 td{
     text-align: right;
 }
+.logo{
+    width: 20%;
+    align: center;
+}
+.center{
+    text-align: center;
+}
