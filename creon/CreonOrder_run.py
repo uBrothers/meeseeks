@@ -167,6 +167,9 @@ def get_stock_balance(code):
             if i % 2 == 0:
                 time.sleep(1)
             sellCheck=True
+            dbgout("Sell에 저장한 킵리스트")
+            time.sleep(0.3)
+            dbgout(str(keep_list))
             for k in keep_list:
                 k = str(k)
                 k = k.replace(" ", "")
@@ -310,6 +313,7 @@ def buy_stock(code):
                         dbgout(str(buy_count))
                         dbgout("`매수 완료 : "+ str(stock_name) + ", 수량 : " + str(buy_qty) + "`")
                         time.sleep(2)
+                        dbgout(str(bought_list))
                         return True
                 else:
                     printlog("매수 실패 : ", orderMsg)
